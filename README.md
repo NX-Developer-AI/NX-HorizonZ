@@ -23,6 +23,8 @@
 
 ## ✨ Key Features
 
+- 🌐 **Languages / Diller**: English and Turkish (`values/` + `values-tr/`). Choose in Settings → Launcher → Language, or follow the system language. / İngilizce ve Türkçe. Ayarlar → Başlatıcı → Dil bölümünden seçilir ya da sistem dili izlenir.
+
 - 🦀 **Native Rust Engine (`Minecraft 26.3`)**: Runs on **Vulkan** and **OpenGL ES (`wgpu`)** via `libhorizon_android.so` (`arm64-v8a` & `armeabi-v7a`).
 - 🤖 **In-Game AI Agent (`Google AI Studio / Gemini API`)**: Connects to the game's local control endpoint (`horizon-control.json` TCP `port` + `auth <TOKEN>` protocol) and an in-game monochrome `AI` HUD overlay with **21 selectable Gemini & Gemma models** (`Gemini 4 Argon`, `Gemini 3.8`, `Gemini 3.5 Flash-Lite`, `Gemini 2.5`, etc.) and **device-local API key storage (`0600`)**.
 - 🎬 **Random Cinematic & Trailer Player**: Plays a curated playlist of **Minecraft Cinematic & Official Trailers** under 5 minutes in **random shuffle** order at 720p, with captions disabled by default and a collapsible 3-dot control menu.

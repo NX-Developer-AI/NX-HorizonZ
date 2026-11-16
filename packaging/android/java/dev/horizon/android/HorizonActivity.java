@@ -8,6 +8,8 @@ import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.app.NativeActivity;
 import android.content.Context;
+import dev.horizon.android.i18n.LauncherLocale;
+import dev.horizon.android.i18n.LauncherText;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Canvas;
@@ -83,7 +85,7 @@ public final class HorizonActivity extends NativeActivity {
     private ObjectAnimator aiPanelPulseAnimator;
     private volatile boolean aiTaskRunning = false;
     private volatile boolean aiTaskAbortRequested = false;
-    private volatile String lastAiReplyText = "Ready. Enter any command or task for Minecraft 26.3.";
+    private volatile String lastAiReplyText = LauncherText.get(R.string.ai_overlay_ready_enter_command);
     private volatile long cachedControlMtime = -1L;
     private volatile String cachedControlHost = "127.0.0.1";
     private volatile int cachedControlPort = 0;
@@ -100,6 +102,11 @@ public final class HorizonActivity extends NativeActivity {
     }
 
     private native void nativeDocumentResult(int request, int result, String uri);
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LauncherLocale.INSTANCE.wrap(base));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -305,7 +312,7 @@ public final class HorizonActivity extends NativeActivity {
         final boolean autonomousActions = intent == null || intent.getBooleanExtra("HORIZON_AI_AGENT_AUTONOMOUS", true);
         final String taskPrompt = (intent != null && intent.getStringExtra("HORIZON_AI_AGENT_TASK") != null)
             ? intent.getStringExtra("HORIZON_AI_AGENT_TASK")
-            : "Bantu player melakukan apapun di dalam Minecraft 26.3.";
+            : LauncherText.get(R.string.help_the_player_inside_minecraft_26_3);
 
         // Attach minimalist monochrome in-game system "AI" button once splash finishes
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -341,7 +348,7 @@ public final class HorizonActivity extends NativeActivity {
                             greetedInWorld = true;
                             sendControlCommandToGame(
                                 homeDir,
-                                "chat [AI] " + formatModelDisplayName(modelId) + " ready. Tap 'AI' at top-left or type @ai <task>."
+                                "chat [AI] " + LauncherText.get(R.string.ai_overlay_chat_ready, formatModelDisplayName(modelId))
                             );
                         }
                     }
@@ -535,7 +542,7 @@ public final class HorizonActivity extends NativeActivity {
             header.addView(statusDot, sDotLp);
 
             final TextView titleTv = new TextView(this);
-            titleTv.setText("HORIZONZ AI  •  " + formatModelDisplayName(modelId) + (aiTaskRunning ? "  [ACTIVE]" : ""));
+            titleTv.setText("HORIZONZ AI  •  " + formatModelDisplayName(modelId) + (aiTaskRunning ? LauncherText.get(R.string.ai_overlay_active_tag) : ""));
             titleTv.setTextColor(Color.parseColor("#F4F6F8"));
             titleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f);
             titleTv.getPaint().setFakeBoldText(true);
@@ -593,7 +600,7 @@ public final class HorizonActivity extends NativeActivity {
                     sendControlCommandToGame(homeDir, "sneak false");
                     sendControlCommandToGame(homeDir, "sprint false");
                 }).start();
-                lastAiReplyText = "Stopped active AI task.";
+                lastAiReplyText = LauncherText.get(R.string.ai_overlay_stopped_task);
                 replyTv.setText(lastAiReplyText);
             });
             LinearLayout.LayoutParams utilBtnLp = new LinearLayout.LayoutParams(dp(52), dp(26));
@@ -614,7 +621,7 @@ public final class HorizonActivity extends NativeActivity {
             clearBtn.setBackground(clearBg);
             attachPressScaleAnimation(clearBtn);
             clearBtn.setOnClickListener(v -> {
-                lastAiReplyText = "Ready. Select a quick action or enter any instruction below.";
+                lastAiReplyText = LauncherText.get(R.string.ai_overlay_ready_quick_action);
                 replyTv.setText(lastAiReplyText);
             });
             LinearLayout.LayoutParams clearLp = new LinearLayout.LayoutParams(dp(52), dp(26));
@@ -673,10 +680,10 @@ public final class HorizonActivity extends NativeActivity {
             chipsRow.setGravity(Gravity.CENTER_VERTICAL);
 
             final String[][] quickActions = new String[][] {
-                { "⚡ Status & Pos", "Check my current coordinates, health, hunger, and inventory summary, and report briefly." },
-                { "🏠 Build Shelter", "Build a protective shelter around my current coordinates with a torch inside." },
-                { "⛏️ Mine Wood", "Find the nearest log block, walk to it, and mine it." },
-                { "☀️ Day & Clear", "/time set day" }
+                { LauncherText.get(R.string.ai_quick_status_label), LauncherText.get(R.string.ai_quick_status_prompt) },
+                { LauncherText.get(R.string.ai_quick_shelter_label), LauncherText.get(R.string.ai_quick_shelter_prompt) },
+                { LauncherText.get(R.string.ai_quick_wood_label), LauncherText.get(R.string.ai_quick_wood_prompt) },
+                { LauncherText.get(R.string.ai_quick_day_label), "/time set day" }
             };
 
             for (final String[] qa : quickActions) {
@@ -700,7 +707,7 @@ public final class HorizonActivity extends NativeActivity {
                         new Thread(() -> {
                             String r1 = sendControlCommandToGame(homeDir, "command " + mcCmd);
                             String r2 = sendControlCommandToGame(homeDir, "command weather clear");
-                            final String out = "> /" + mcCmd + " & /weather clear\n" + (r1 != null && !r1.isEmpty() ? r1 : "Executed.");
+                            final String out = "> /" + mcCmd + " & /weather clear\n" + (r1 != null && !r1.isEmpty() ? r1 : LauncherText.get(R.string.ai_overlay_executed));
                             lastAiReplyText = out;
                             runOnUiThread(() -> {
                                 replyTv.setText(out);
@@ -710,7 +717,7 @@ public final class HorizonActivity extends NativeActivity {
                     } else {
                         String key = readLocalGeminiKey(homeDir);
                         if (key.isEmpty()) {
-                            replyTv.setText("Google AI Studio API Key is not set. Add your API Key in Launcher Settings > AI Agent.");
+                            replyTv.setText(LauncherText.get(R.string.ai_overlay_api_key_missing));
                             return;
                         }
                         statusDotBg.setColor(Color.parseColor("#8BE0FF"));
@@ -718,8 +725,8 @@ public final class HorizonActivity extends NativeActivity {
                         if (aiPanelPulseAnimator != null && !aiPanelPulseAnimator.isStarted()) {
                             aiPanelPulseAnimator.start();
                         }
-                        titleTv.setText("HORIZONZ AI  •  " + formatModelDisplayName(modelId) + "  [ACTIVE]");
-                        replyTv.setText("Thinking & executing '" + qa[0] + "' with " + formatModelDisplayName(modelId) + "...");
+                        titleTv.setText("HORIZONZ AI  •  " + formatModelDisplayName(modelId) + LauncherText.get(R.string.ai_overlay_active_tag));
+                        replyTv.setText(LauncherText.get(R.string.ai_overlay_thinking_quick, qa[0], formatModelDisplayName(modelId)));
                         executeGeminiPromptInBackground(homeDir, key, modelId, taskPrompt, cmdOrPrompt, autonomousActions, replyTv, titleTv, replyScroll, pulseBar, statusDotBg);
                     }
                 });
@@ -762,7 +769,7 @@ public final class HorizonActivity extends NativeActivity {
             inputRow.setGravity(Gravity.CENTER_VERTICAL);
 
             final EditText promptInput = new EditText(this);
-            promptInput.setHint("Ask AI or type /command (e.g. build house, mine oak_log, /gamemode creative)...");
+            promptInput.setHint(LauncherText.get(R.string.ai_overlay_input_hint));
             promptInput.setHintTextColor(Color.parseColor("#6E7D8C"));
             promptInput.setTextColor(Color.parseColor("#F4F6F8"));
             promptInput.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f);
@@ -778,7 +785,7 @@ public final class HorizonActivity extends NativeActivity {
             inputRow.addView(promptInput, inLp);
 
             Button sendBtn = new Button(this);
-            sendBtn.setText("Run ✦");
+            sendBtn.setText(LauncherText.get(R.string.ai_overlay_run_button));
             sendBtn.setAllCaps(false);
             sendBtn.setTextColor(Color.parseColor("#071824"));
             sendBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f);
@@ -798,7 +805,7 @@ public final class HorizonActivity extends NativeActivity {
                     replyTv.setText("> command " + mcCmd);
                     new Thread(() -> {
                         String res = sendControlCommandToGame(homeDir, "command " + mcCmd);
-                        final String out = "> /" + mcCmd + "\n" + (res != null && !res.isEmpty() ? res : "Executed.");
+                        final String out = "> /" + mcCmd + "\n" + (res != null && !res.isEmpty() ? res : LauncherText.get(R.string.ai_overlay_executed));
                         lastAiReplyText = out;
                         runOnUiThread(() -> {
                             replyTv.setText(out);
@@ -810,7 +817,7 @@ public final class HorizonActivity extends NativeActivity {
 
                 String key = readLocalGeminiKey(homeDir);
                 if (key.isEmpty()) {
-                    replyTv.setText("Google AI Studio API Key is not set. Add your API Key in Launcher Settings > AI Agent (or type /<command> for direct execution).");
+                    replyTv.setText(LauncherText.get(R.string.ai_overlay_api_key_missing_direct));
                     return;
                 }
                 statusDotBg.setColor(Color.parseColor("#8BE0FF"));
@@ -818,8 +825,8 @@ public final class HorizonActivity extends NativeActivity {
                 if (aiPanelPulseAnimator != null && !aiPanelPulseAnimator.isStarted()) {
                     aiPanelPulseAnimator.start();
                 }
-                titleTv.setText("HORIZONZ AI  •  " + formatModelDisplayName(modelId) + "  [ACTIVE]");
-                replyTv.setText("Planning & executing with " + formatModelDisplayName(modelId) + "...");
+                titleTv.setText("HORIZONZ AI  •  " + formatModelDisplayName(modelId) + LauncherText.get(R.string.ai_overlay_active_tag));
+                replyTv.setText(LauncherText.get(R.string.ai_overlay_planning, formatModelDisplayName(modelId)));
                 executeGeminiPromptInBackground(homeDir, key, modelId, taskPrompt, q, autonomousActions, replyTv, titleTv, replyScroll, pulseBar, statusDotBg);
             });
             inputRow.addView(sendBtn, new LinearLayout.LayoutParams(dp(72), dp(35)));
@@ -913,7 +920,7 @@ public final class HorizonActivity extends NativeActivity {
                         });
                     }
                 } else {
-                    String fallbackMsg = "No response from Gemini API (" + formatModelDisplayName(modelId) + "). Check internet connection and API Key.";
+                    String fallbackMsg = LauncherText.get(R.string.ai_overlay_no_response, formatModelDisplayName(modelId));
                     lastAiReplyText = fallbackMsg;
                     if (targetReplyView != null) {
                         runOnUiThread(() -> targetReplyView.setText(fallbackMsg));
@@ -1244,7 +1251,7 @@ public final class HorizonActivity extends NativeActivity {
             if (allowActions && commandsArr != null && commandsArr.length() > 0) {
                 for (int i = 0; i < commandsArr.length(); i++) {
                     if (aiTaskAbortRequested) {
-                        logBuilder.append("\n[Stopped by user]");
+                        logBuilder.append(LauncherText.get(R.string.ai_overlay_stopped_by_user));
                         break;
                     }
                     Object item = commandsArr.opt(i);

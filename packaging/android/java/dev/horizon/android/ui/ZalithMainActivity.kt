@@ -2,6 +2,10 @@
 
 package dev.horizon.android.ui
 
+import dev.horizon.android.i18n.LauncherText
+import dev.horizon.android.i18n.LauncherLanguage
+import dev.horizon.android.i18n.LauncherLocale
+import android.content.Context
 import android.Manifest
 import android.content.Intent
 import android.graphics.Bitmap
@@ -214,23 +218,27 @@ private fun SyncDynamicLauncherPalette(palette: ZalithThemePalette, useDynamicCo
 }
 
 enum class SettingsSubCategory(val label: String, val icon: ImageVector) {
-    RENDERER("Renderer", Icons.Default.DisplaySettings),
-    GAME("Game", Icons.Default.RocketLaunch),
-    AI_AGENT("AI Agent", Icons.Default.AutoAwesome),
-    CONTROLS("Controls", Icons.Default.Games),
-    GAMEPAD("Gamepad", Icons.Default.SportsEsports),
-    LAUNCHER("Launcher", Icons.Default.ViewInAr)
+    RENDERER(LauncherText.get(R.string.renderer), Icons.Default.DisplaySettings),
+    GAME(LauncherText.get(R.string.game), Icons.Default.RocketLaunch),
+    AI_AGENT(LauncherText.get(R.string.ai_agent), Icons.Default.AutoAwesome),
+    CONTROLS(LauncherText.get(R.string.controls), Icons.Default.Games),
+    GAMEPAD(LauncherText.get(R.string.gamepad), Icons.Default.SportsEsports),
+    LAUNCHER(LauncherText.get(R.string.launcher), Icons.Default.ViewInAr)
 }
 
 enum class AccountSubCategory(val label: String, val icon: ImageVector) {
-    SKIN_STUDIO("Skin Studio", Icons.Default.Checkroom),
-    PROFILES("Accounts", Icons.Default.People)
+    SKIN_STUDIO(LauncherText.get(R.string.skin_studio), Icons.Default.Checkroom),
+    PROFILES(LauncherText.get(R.string.accounts), Icons.Default.People)
 }
 
 class ZalithMainActivity : ComponentActivity() {
     companion object {
         @Volatile
         private var hasCheckedUpdateThisSession = false
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LauncherLocale.wrap(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -358,7 +366,7 @@ class ZalithMainActivity : ComponentActivity() {
                             },
                             onCheckForUpdatesManual = {
                                 scope.launch {
-                                    Toast.makeText(context, "Checking github.com/Fadiba21/HorizonZ-Launcher-Android/releases...", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, LauncherText.get(R.string.checking_github_com_fadiba21_horizonz_launcher_android), Toast.LENGTH_SHORT).show()
                                     val found = withContext(Dispatchers.IO) {
                                         HorizonNativeBridge.checkGithubLatestReleaseUpdate()
                                     }
@@ -366,7 +374,7 @@ class ZalithMainActivity : ComponentActivity() {
                                         releaseUpdateInfo = found
                                         showUpdateBanner = true
                                     } else {
-                                        Toast.makeText(context, "HorizonZ v${HorizonNativeBridge.INSTALLED_LAUNCHER_VERSION} sudah versi terbaru!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, LauncherText.get(R.string.horizonz_v_is_already_the_latest_version, HorizonNativeBridge.INSTALLED_LAUNCHER_VERSION), Toast.LENGTH_SHORT).show()
                                         try {
                                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(HorizonNativeBridge.GITHUB_FORK_RELEASES_URL)))
                                         } catch (ignored: Exception) {
@@ -620,7 +628,7 @@ fun HorizonZBlackSplashOverlay() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Initializing HorizonZ Rust Engine (${(progress * 100).toInt()}%)",
+                text = LauncherText.get(R.string.initializing_horizonz_rust_engine, (progress * 100).toInt()),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFFD5DEE5)
@@ -1170,7 +1178,7 @@ fun <T> ZalithSettingDropdownCard(
                         color = MutedSubtitleText
                     )
                     Text(
-                        text = "Selected: ${itemLabel(selectedItem)}",
+                        text = LauncherText.get(R.string.selected, itemLabel(selectedItem)),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFFC5D1D8)
@@ -1295,7 +1303,7 @@ fun ZalithSettingSliderCard(
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowLeft,
-                            contentDescription = "Decrease",
+                            contentDescription = LauncherText.get(R.string.decrease),
                             tint = SkyBlueDarkText,
                             modifier = Modifier
                                 .size(20.dp)
@@ -1305,7 +1313,7 @@ fun ZalithSettingSliderCard(
                         )
                         Icon(
                             imageVector = Icons.Default.ArrowRight,
-                            contentDescription = "Increase",
+                            contentDescription = LauncherText.get(R.string.increase),
                             tint = SkyBlueDarkText,
                             modifier = Modifier
                                 .size(20.dp)
@@ -1501,13 +1509,13 @@ private fun InAppUpdateBannerCard(
                 }
                 Column {
                     Text(
-                        text = "New Version!! (v${info.latestVersion})",
+                        text = LauncherText.get(R.string.new_version_v, info.latestVersion),
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 13.sp,
                         color = Color.White
                     )
                     Text(
-                        text = "Installed: v${HorizonNativeBridge.INSTALLED_LAUNCHER_VERSION} • ${info.releaseTitle}",
+                        text = LauncherText.get(R.string.installed_v, HorizonNativeBridge.INSTALLED_LAUNCHER_VERSION, info.releaseTitle),
                         fontSize = 11.sp,
                         color = MutedSubtitleText,
                         maxLines = 1,
@@ -1524,7 +1532,7 @@ private fun InAppUpdateBannerCard(
                     modifier = Modifier.height(34.dp),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp)
                 ) {
-                    Text("Later", fontSize = 12.sp, color = MutedSubtitleText)
+                    Text(LauncherText.get(R.string.later), fontSize = 12.sp, color = MutedSubtitleText)
                 }
                 Button(
                     onClick = onUpdateClick,
@@ -1533,7 +1541,7 @@ private fun InAppUpdateBannerCard(
                     modifier = Modifier.height(34.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp)
                 ) {
-                    Text("Update", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
+                    Text(LauncherText.get(R.string.update), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
                 }
             }
         }
@@ -1847,12 +1855,12 @@ private fun ZalithReferenceTopBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = LauncherText.get(R.string.back),
                             tint = SkyBlueAccent,
                             modifier = Modifier.size(15.dp)
                         )
                         Text(
-                            text = "Back",
+                            text = LauncherText.get(R.string.back),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White
@@ -1895,11 +1903,11 @@ private fun ZalithReferenceTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Folder,
-                        contentDescription = "Data Folder",
+                        contentDescription = LauncherText.get(R.string.data_folder),
                         tint = Color(0xFFD5DEE5),
                         modifier = Modifier.size(15.dp)
                     )
-                    Text("Folder", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.White)
+                    Text(LauncherText.get(R.string.folder), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.White)
                 }
             }
 
@@ -1915,11 +1923,11 @@ private fun ZalithReferenceTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Terminal,
-                        contentDescription = "Log",
+                        contentDescription = LauncherText.get(R.string.log),
                         tint = SkyBlueAccent,
                         modifier = Modifier.size(15.dp)
                     )
-                    Text("Log", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.White)
+                    Text(LauncherText.get(R.string.log), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color.White)
                 }
             }
         }
@@ -2566,14 +2574,14 @@ private fun CleanHomeViewport(
                             if (bmp != null) {
                                 Image(
                                     bitmap = bmp,
-                                    contentDescription = "Custom Minecraft Wallpaper",
+                                    contentDescription = LauncherText.get(R.string.custom_minecraft_wallpaper),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             } else {
                                 Image(
                                     painter = painterResource(id = DASHBOARD_WALLPAPERS[0]),
-                                    contentDescription = "Minecraft Wallpaper",
+                                    contentDescription = LauncherText.get(R.string.minecraft_wallpaper),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
@@ -2582,7 +2590,7 @@ private fun CleanHomeViewport(
                             val resId = DASHBOARD_WALLPAPERS[idx % DASHBOARD_WALLPAPERS.size]
                             Image(
                                 painter = painterResource(id = resId),
-                                contentDescription = "Minecraft Wallpaper",
+                                contentDescription = LauncherText.get(R.string.minecraft_wallpaper),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
@@ -2626,14 +2634,14 @@ private fun CleanHomeViewport(
                         if (isVideoMode) {
                             DashboardQuickIconPill(
                                 icon = if (config.muteTrailerVideo) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
-                                label = if (config.muteTrailerVideo) "Silent" else "Sound On",
+                                label = if (config.muteTrailerVideo) LauncherText.get(R.string.silent) else LauncherText.get(R.string.sound_on),
                                 onClick = {
                                     onConfigChange(config.copy(muteTrailerVideo = !config.muteTrailerVideo))
                                 }
                             )
                             DashboardQuickIconPill(
                                 icon = Icons.Default.Shuffle,
-                                label = "Random Trailer",
+                                label = LauncherText.get(R.string.random_trailer),
                                 onClick = {
                                     currentTrailerIndex = pickRandomNextTrailer(currentTrailerIndex, trailerList.size.coerceAtLeast(1))
                                 }
@@ -2641,14 +2649,14 @@ private fun CleanHomeViewport(
                         } else {
                             DashboardQuickIconPill(
                                 icon = Icons.Default.Wallpaper,
-                                label = "Ganti Wallpaper",
+                                label = LauncherText.get(R.string.change_wallpaper),
                                 onClick = { wallpaperPicker.launch("image/*") }
                             )
                         }
 
                         DashboardQuickIconPill(
                             icon = if (isVideoMode) Icons.Default.Image else Icons.Default.PlayCircleFilled,
-                            label = if (isVideoMode) "Mode Wallpaper" else "Play Trailer",
+                            label = if (isVideoMode) LauncherText.get(R.string.wallpaper_mode) else LauncherText.get(R.string.play_trailer),
                             onClick = {
                                 val nextVideo = !isVideoMode
                                 onConfigChange(
@@ -2673,7 +2681,7 @@ private fun CleanHomeViewport(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = if (isDashboardMenuExpanded) Icons.Default.Close else Icons.Default.MoreVert,
-                            contentDescription = "Menu Pengaturan Video & Wallpaper",
+                            contentDescription = LauncherText.get(R.string.video_wallpaper_settings_menu),
                             tint = if (isDashboardMenuExpanded) SkyBlueAccent else Color.White,
                             modifier = Modifier.size(20.dp)
                         )
@@ -2836,12 +2844,12 @@ private fun CleanAccountsAndSkinsViewport(
             onDismissRequest = { renameSkinTarget = null },
             containerColor = Color(0xFF1F262B),
             title = {
-                Text("Atur Nama Skin", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(LauncherText.get(R.string.set_skin_name), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Ubah nama file skin (kosongkan untuk otomatis default.png, default1.png, dst.):",
+                        text = LauncherText.get(R.string.rename_the_skin_file_leave_empty_for),
                         fontSize = 12.sp,
                         color = MutedSubtitleText
                     )
@@ -2849,7 +2857,7 @@ private fun CleanAccountsAndSkinsViewport(
                         value = renameSkinInput,
                         onValueChange = { renameSkinInput = it },
                         singleLine = true,
-                        label = { Text("Nama Skin (.png)", fontSize = 11.sp) }
+                        label = { Text(LauncherText.get(R.string.skin_name_png), fontSize = 11.sp) }
                     )
                 }
             },
@@ -2868,18 +2876,18 @@ private fun CleanAccountsAndSkinsViewport(
                                 onAccountsChange(updatedAccounts)
                             }
                             onSkinUpdated()
-                            onUpdateBanner("Nama skin berhasil diubah menjadi '${updated.fileName}'!")
+                            onUpdateBanner(LauncherText.get(R.string.skin_name_changed_to, updated.fileName))
                         }
                         renameSkinTarget = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                 ) {
-                    Text("Simpan", color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
+                    Text(LauncherText.get(R.string.save), color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { renameSkinTarget = null }) {
-                    Text("Batal", color = Color.White)
+                    Text(LauncherText.get(R.string.cancel), color = Color.White)
                 }
             }
         )
@@ -2955,7 +2963,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
-                                                text = if (activeAccount.slimSkinModel) "Slim (3px)" else "Wide (4px)",
+                                                text = if (activeAccount.slimSkinModel) LauncherText.get(R.string.slim_3px) else LauncherText.get(R.string.wide_4px),
                                                 fontSize = 10.sp,
                                                 color = SkyBlueAccent,
                                                 maxLines = 1
@@ -2969,7 +2977,7 @@ private fun CleanAccountsAndSkinsViewport(
                                         modifier = Modifier.animatedPressScale { is3DPreview = !is3DPreview }
                                     ) {
                                         Text(
-                                            text = if (is3DPreview) "3D Preview" else "2D View",
+                                            text = if (is3DPreview) LauncherText.get(R.string.text_3d_preview) else LauncherText.get(R.string.text_2d_view),
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = SkyBlueDarkText,
@@ -3035,7 +3043,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             modifier = Modifier.animatedPressScale { autoRotate3D = !autoRotate3D }
                                         ) {
                                             Text(
-                                                text = if (autoRotate3D) "Spin: ON" else "Spin: OFF",
+                                                text = if (autoRotate3D) LauncherText.get(R.string.spin_on) else LauncherText.get(R.string.spin_off),
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = if (autoRotate3D) SkyBlueAccent else MutedSubtitleText,
@@ -3048,7 +3056,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             modifier = Modifier.animatedPressScale { walkAnim3D = !walkAnim3D }
                                         ) {
                                             Text(
-                                                text = if (walkAnim3D) "Walk: ON" else "Walk: OFF",
+                                                text = if (walkAnim3D) LauncherText.get(R.string.walk_on) else LauncherText.get(R.string.walk_off),
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = if (walkAnim3D) SkyBlueAccent else MutedSubtitleText,
@@ -3062,7 +3070,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             modifier = Modifier.animatedPressScale { showBackView2D = !showBackView2D }
                                         ) {
                                             Text(
-                                                text = if (showBackView2D) "Tampak Belakang" else "Tampak Depan",
+                                                text = if (showBackView2D) LauncherText.get(R.string.back_view) else LauncherText.get(R.string.front_view),
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = SkyBlueAccent,
@@ -3104,7 +3112,7 @@ private fun CleanAccountsAndSkinsViewport(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = "Import Skin & Simpan ke Pilih Skin",
+                                                text = LauncherText.get(R.string.import_skin_save_to_skin_picker),
                                                 fontSize = 14.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White,
@@ -3112,7 +3120,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
-                                                text = "Atur nama skin sendiri atau kosongkan agar otomatis diberi nama default.png, default1.png, default2.png, dst.",
+                                                text = LauncherText.get(R.string.set_your_own_skin_name_or_leave),
                                                 fontSize = 11.sp,
                                                 color = MutedSubtitleText,
                                                 maxLines = 2
@@ -3133,12 +3141,12 @@ private fun CleanAccountsAndSkinsViewport(
                                             ) {
                                                 Icon(
                                                     Icons.Default.AddPhotoAlternate,
-                                                    contentDescription = "Pilih Foto / Skin",
+                                                    contentDescription = LauncherText.get(R.string.choose_photo_skin),
                                                     tint = SkyBlueDarkText,
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                                 Text(
-                                                    text = "Import Skin",
+                                                    text = LauncherText.get(R.string.import_skin),
                                                     fontSize = 12.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = SkyBlueDarkText,
@@ -3175,7 +3183,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             ) {
                                                 if (customSkinNameInput.isEmpty()) {
                                                     Text(
-                                                        text = "Nama skin (opsional — kosongkan = default.png, default1.png, default2.png...)",
+                                                        text = LauncherText.get(R.string.skin_name_optional_leave_empty_default_png),
                                                         fontSize = 11.sp,
                                                         color = MutedSubtitleText,
                                                         maxLines = 1,
@@ -3194,7 +3202,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             if (customSkinNameInput.isNotEmpty()) {
                                                 Icon(
                                                     imageVector = Icons.Default.Close,
-                                                    contentDescription = "Clear",
+                                                    contentDescription = LauncherText.get(R.string.clear),
                                                     tint = MutedSubtitleText,
                                                     modifier = Modifier
                                                         .size(14.dp)
@@ -3237,7 +3245,7 @@ private fun CleanAccountsAndSkinsViewport(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "Model Lengan:",
+                                            text = LauncherText.get(R.string.arm_model),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = Color.White
@@ -3284,12 +3292,12 @@ private fun CleanAccountsAndSkinsViewport(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "Pilih Skin (Tersimpan & Preset Siap Pakai)",
+                                            text = LauncherText.get(R.string.choose_skin_saved_ready_to_use_presets),
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
-                                        LavenderTagBadge(text = "${savedSkinLibrary.size} Imported")
+                                        LavenderTagBadge(text = LauncherText.get(R.string.imported, savedSkinLibrary.size))
                                     }
 
                                     if (savedSkinLibrary.isNotEmpty()) {
@@ -3315,7 +3323,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                         val updatedList = accounts.map { if (it.id == activeAccount.id) updatedAcc else it }
                                                         onAccountsChange(updatedList)
                                                         onSkinUpdated()
-                                                        onUpdateBanner("Skin '${savedItem.fileName}' aktif & siap digunakan di in-game!")
+                                                        onUpdateBanner(LauncherText.get(R.string.skin_is_active_ready_to_use_in, savedItem.fileName))
                                                     }
                                             ) {
                                                 Row(
@@ -3358,7 +3366,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                     ) {
                                                         Icon(
                                                             imageVector = Icons.Default.Edit,
-                                                            contentDescription = "Ubah Nama Skin",
+                                                            contentDescription = LauncherText.get(R.string.rename_skin),
                                                             tint = Color(0xFFD5DEE5),
                                                             modifier = Modifier
                                                                 .size(17.dp)
@@ -3369,7 +3377,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                         )
                                                         Icon(
                                                             imageVector = Icons.Outlined.Delete,
-                                                            contentDescription = "Hapus Skin",
+                                                            contentDescription = LauncherText.get(R.string.delete_skin),
                                                             tint = Color(0xFFFF8A80),
                                                             modifier = Modifier
                                                                 .size(17.dp)
@@ -3383,7 +3391,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                             color = if (isCurrent) SkyBlueAccent else Color(0xFF344149)
                                                         ) {
                                                             Text(
-                                                                text = if (isCurrent) "Active" else "Pakai",
+                                                                text = if (isCurrent) LauncherText.get(R.string.active) else LauncherText.get(R.string.use),
                                                                 fontSize = 11.sp,
                                                                 fontWeight = FontWeight.Bold,
                                                                 color = if (isCurrent) SkyBlueDarkText else Color.White,
@@ -3415,8 +3423,8 @@ private fun CleanAccountsAndSkinsViewport(
                                                     val updatedList = accounts.map { if (it.id == activeAccount.id) updatedAcc else it }
                                                     onAccountsChange(updatedList)
                                                     onSkinUpdated()
-                                                    onUpdateBanner("Skin '${preset.title}' aktif & siap digunakan di in-game!")
-                                                    Toast.makeText(context, "Skin '${preset.title}' terpasang!", Toast.LENGTH_SHORT).show()
+                                                    onUpdateBanner(LauncherText.get(R.string.skin_is_active_ready_to_use_in, preset.title))
+                                                    Toast.makeText(context, LauncherText.get(R.string.skin_applied, preset.title), Toast.LENGTH_SHORT).show()
                                                 }
                                         ) {
                                             Row(
@@ -3460,7 +3468,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                     color = if (isCurrent) SkyBlueAccent else Color(0xFF344149)
                                                 ) {
                                                     Text(
-                                                        text = if (isCurrent) "Active" else "Pakai",
+                                                        text = if (isCurrent) LauncherText.get(R.string.active) else LauncherText.get(R.string.use),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold,
                                                         color = if (isCurrent) SkyBlueDarkText else Color.White,
@@ -3491,7 +3499,7 @@ private fun CleanAccountsAndSkinsViewport(
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
-                                text = "Player Accounts & Microsoft Sign-In",
+                                text = LauncherText.get(R.string.player_accounts_microsoft_sign_in),
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -3521,7 +3529,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             contentAlignment = Alignment.CenterStart
                                         ) {
                                             if (newAccountName.isEmpty()) {
-                                                Text("Enter Player Name / Gamertag...", fontSize = 12.sp, color = MutedSubtitleText)
+                                                Text(LauncherText.get(R.string.enter_player_name_gamertag), fontSize = 12.sp, color = MutedSubtitleText)
                                             }
                                             BasicTextField(
                                                 value = newAccountName,
@@ -3556,7 +3564,7 @@ private fun CleanAccountsAndSkinsViewport(
                                         color = SkyBlueAccent,
                                         modifier = Modifier.animatedPressScale {
                                             if (selectedAccountType == AccountType.ELY_BY) {
-                                                elyByStatusMessage = "Use Authenticate Ely.by below with your password to sign in."
+                                                elyByStatusMessage = LauncherText.get(R.string.use_authenticate_ely_by_below_with_your)
                                             } else if (newAccountName.isNotBlank()) {
                                                 val added = ZalithAccount(
                                                     id = UUID.randomUUID().toString(),
@@ -3577,7 +3585,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
                                             Icon(Icons.Default.PersonAdd, contentDescription = null, tint = SkyBlueDarkText, modifier = Modifier.size(15.dp))
-                                            Text("Save Profile", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
+                                            Text(LauncherText.get(R.string.save_profile), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
                                         }
                                     }
                                 }
@@ -3594,7 +3602,7 @@ private fun CleanAccountsAndSkinsViewport(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Text(
-                                            text = "Ely.by Account Sign-In (Password & 2FA are never saved to disk)",
+                                            text = LauncherText.get(R.string.ely_by_account_sign_in_password_2fa),
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = SkyBlueAccent
@@ -3603,14 +3611,14 @@ private fun CleanAccountsAndSkinsViewport(
                                             value = elyByPassword,
                                             onValueChange = { elyByPassword = it },
                                             singleLine = true,
-                                            label = { Text("Ely.by Password", fontSize = 11.sp) },
+                                            label = { Text(LauncherText.get(R.string.ely_by_password), fontSize = 11.sp) },
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                         OutlinedTextField(
                                             value = elyByTotpToken,
                                             onValueChange = { elyByTotpToken = it.filter { ch -> ch.isDigit() }.take(6) },
                                             singleLine = true,
-                                            label = { Text("Optional 6-Digit 2FA Code", fontSize = 11.sp) },
+                                            label = { Text(LauncherText.get(R.string.optional_6_digit_2fa_code), fontSize = 11.sp) },
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                         Row(
@@ -3625,7 +3633,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                         val totpCopy = elyByTotpToken.trim()
                                                         elyByPassword = ""
                                                         elyByTotpToken = ""
-                                                        elyByStatusMessage = "Authenticating with Ely.by..."
+                                                        elyByStatusMessage = LauncherText.get(R.string.authenticating_with_ely_by)
                                                         scope.launch {
                                                             val (authOk, authedAcc) = withContext(Dispatchers.IO) {
                                                                 HorizonNativeBridge.authenticateElyByAccount(
@@ -3639,15 +3647,15 @@ private fun CleanAccountsAndSkinsViewport(
                                                                 val updated = accounts.map { it.copy(isActive = false) } + authedAcc
                                                                 onAccountsChange(updated)
                                                                 newAccountName = ""
-                                                                elyByStatusMessage = "Ely.by account ${authedAcc.username} ready."
+                                                                elyByStatusMessage = LauncherText.get(R.string.ely_by_account_ready, authedAcc.username)
                                                             } else {
-                                                                elyByStatusMessage = "Ely.by sign-in failed. Verify credentials or 2FA code."
+                                                                elyByStatusMessage = LauncherText.get(R.string.ely_by_sign_in_failed_verify_credentials)
                                                             }
                                                         }
                                                     }
                                                 }
                                             ) {
-                                                Text("Authenticate Ely.by", fontSize = 11.sp)
+                                                Text(LauncherText.get(R.string.authenticate_ely_by), fontSize = 11.sp)
                                             }
                                             elyByStatusMessage?.let { msg ->
                                                 Text(text = msg, fontSize = 11.sp, color = MutedSubtitleText)
@@ -3676,7 +3684,7 @@ private fun CleanAccountsAndSkinsViewport(
                                     ) {
                                         Icon(Icons.Default.OpenInBrowser, contentDescription = null, tint = SkyBlueAccent, modifier = Modifier.size(17.dp))
                                         Text(
-                                            text = "Open Microsoft Device Link (microsoft.com/link) to authorize Xbox Live Gamertag",
+                                            text = LauncherText.get(R.string.open_microsoft_device_link_microsoft_com_link),
                                             fontSize = 12.sp,
                                             color = Color.White
                                         )
@@ -3727,11 +3735,11 @@ private fun CleanAccountsAndSkinsViewport(
                                                     )
                                                     LavenderTagBadge(text = acc.accountType.badge)
                                                     if (acc.isActive) {
-                                                        LavenderTagBadge(text = "Active")
+                                                        LavenderTagBadge(text = LauncherText.get(R.string.active))
                                                     }
                                                 }
                                                 Text(
-                                                    text = "Skin: ${acc.skinSourceLabel}",
+                                                    text = LauncherText.get(R.string.skin, acc.skinSourceLabel),
                                                     fontSize = 11.sp,
                                                     color = MutedSubtitleText,
                                                     maxLines = 1,
@@ -3754,7 +3762,7 @@ private fun CleanAccountsAndSkinsViewport(
                                                 }
                                             ) {
                                                 Text(
-                                                    text = "Edit Skin",
+                                                    text = LauncherText.get(R.string.edit_skin),
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.SemiBold,
                                                     color = SkyBlueAccent,
@@ -3765,7 +3773,7 @@ private fun CleanAccountsAndSkinsViewport(
                                             if (accounts.size > 1) {
                                                 Icon(
                                                     imageVector = Icons.Outlined.Delete,
-                                                    contentDescription = "Delete Account",
+                                                    contentDescription = LauncherText.get(R.string.delete_account),
                                                     tint = Color(0xFFFF8A80),
                                                     modifier = Modifier
                                                         .size(20.dp)
@@ -3872,7 +3880,7 @@ private fun CleanLogsViewport(
                             contentAlignment = Alignment.CenterStart
                         ) {
                             if (searchQuery.isEmpty()) {
-                                Text("Search logs (URL, speed, wgpu, skin)...", fontSize = 12.sp, color = MutedSubtitleText)
+                                Text(LauncherText.get(R.string.search_logs_url_speed_wgpu_skin), fontSize = 12.sp, color = MutedSubtitleText)
                             }
                             BasicTextField(
                                 value = searchQuery,
@@ -3915,8 +3923,8 @@ private fun CleanLogsViewport(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(Icons.Default.ContentCopy, contentDescription = "Copy", tint = SkyBlueDarkText, modifier = Modifier.size(14.dp))
-                            Text("Copy", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
+                            Icon(Icons.Default.ContentCopy, contentDescription = LauncherText.get(R.string.copy), tint = SkyBlueDarkText, modifier = Modifier.size(14.dp))
+                            Text(LauncherText.get(R.string.copy), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
                         }
                     }
 
@@ -3933,8 +3941,8 @@ private fun CleanLogsViewport(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = "Clear", tint = Color(0xFFFF8A80), modifier = Modifier.size(14.dp))
-                            Text("Clear", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF8A80))
+                            Icon(Icons.Default.DeleteSweep, contentDescription = LauncherText.get(R.string.clear), tint = Color(0xFFFF8A80), modifier = Modifier.size(14.dp))
+                            Text(LauncherText.get(R.string.clear), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF8A80))
                         }
                     }
                 }
@@ -4017,7 +4025,7 @@ private fun CleanVersionsViewport(
     var repairResultPopupMessage by remember { mutableStateOf<String?>(null) }
     var deleteResultPopupMessage by remember { mutableStateOf<String?>(null) }
     var sizeRefreshTick by remember { mutableIntStateOf(0) }
-    var installedSizeText by remember { mutableStateOf("Checking...") }
+    var installedSizeText by remember { mutableStateOf(LauncherText.get(R.string.checking)) }
 
     LaunchedEffect(installStatus.ready, installStatus.running, sizeRefreshTick) {
         installedSizeText = withContext(Dispatchers.IO) {
@@ -4041,10 +4049,10 @@ private fun CleanVersionsViewport(
             onDismissRequest = { showCancelConfirmDialog = false },
             containerColor = Color(0xFF1F262B),
             icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFFFB74D)) },
-            title = { Text("Batalkan Download?", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
+            title = { Text(LauncherText.get(R.string.cancel_download), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
             text = {
                 Text(
-                    "Proses unduhan aset Minecraft 26.3 yang sedang berjalan akan dihentikan dan file sementara (.partial) akan dibersihkan.",
+                    LauncherText.get(R.string.the_running_minecraft_26_3_asset_download),
                     fontSize = 13.sp,
                     color = Color(0xFFD5DEE5)
                 )
@@ -4058,12 +4066,12 @@ private fun CleanVersionsViewport(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
                 ) {
-                    Text("Ya, Batalkan", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.yes_cancel), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCancelConfirmDialog = false }) {
-                    Text("Lanjutkan", fontSize = 12.sp, color = SkyBlueAccent)
+                    Text(LauncherText.get(R.string.continue_text), fontSize = 12.sp, color = SkyBlueAccent)
                 }
             }
         )
@@ -4074,10 +4082,10 @@ private fun CleanVersionsViewport(
             onDismissRequest = { showRepairConfirmDialog = false },
             containerColor = Color(0xFF1F262B),
             icon = { Icon(Icons.Default.Build, contentDescription = null, tint = SkyBlueAccent) },
-            title = { Text("Smart Repair Aset Minecraft 26.3", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
+            title = { Text(LauncherText.get(R.string.smart_repair_minecraft_26_3_assets), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
             text = {
                 Text(
-                    "Sistem akan memeriksa kelengkapan file engine, tabel worldgen 26.3, audio, dan 60 ikon kontrol sentuh.\n\nFile yang rusak atau hilang akan dipulihkan otomatis tanpa menghapus data dunia (Saves) atau Mod Anda.",
+                    LauncherText.get(R.string.the_system_will_check_the_integrity_of),
                     fontSize = 13.sp,
                     color = Color(0xFFD5DEE5),
                     lineHeight = 18.sp
@@ -4096,12 +4104,12 @@ private fun CleanVersionsViewport(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                 ) {
-                    Text("Mulai Repair Sekarang", color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.start_repair_now), color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRepairConfirmDialog = false }) {
-                    Text("Batal", fontSize = 12.sp, color = MutedSubtitleText)
+                    Text(LauncherText.get(R.string.cancel), fontSize = 12.sp, color = MutedSubtitleText)
                 }
             }
         )
@@ -4112,7 +4120,7 @@ private fun CleanVersionsViewport(
             onDismissRequest = { repairResultPopupMessage = null },
             containerColor = Color(0xFF1F262B),
             icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF81C784)) },
-            title = { Text("Hasil Smart Repair Aset", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
+            title = { Text(LauncherText.get(R.string.smart_asset_repair_result), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
             text = {
                 Text(
                     text = msg,
@@ -4126,7 +4134,7 @@ private fun CleanVersionsViewport(
                     onClick = { repairResultPopupMessage = null },
                     colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                 ) {
-                    Text("OK, Mengerti", color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.ok_got_it), color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
         )
@@ -4137,10 +4145,10 @@ private fun CleanVersionsViewport(
             onDismissRequest = { showDeleteAllConfirmDialog = false },
             containerColor = Color(0xFF1F262B),
             icon = { Icon(Icons.Default.DeleteForever, contentDescription = null, tint = Color(0xFFFF8A80)) },
-            title = { Text("Hapus Total Semua Aset Minecraft?", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
+            title = { Text(LauncherText.get(R.string.delete_all_minecraft_assets), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
             text = {
                 Text(
-                    "Seluruh file aset Minecraft 26.3 (.local/horizon-client/26.3) akan dihapus total dari penyimpanan perangkat ($installedSizeText).\n\nAnda perlu mengunduh ulang aset jika ingin masuk ke dalam game lagi. Data Saves & Mods tetap aman.",
+                    LauncherText.get(R.string.all_minecraft_26_3_asset_files_local, installedSizeText),
                     fontSize = 13.sp,
                     color = Color(0xFFD5DEE5),
                     lineHeight = 18.sp
@@ -4152,18 +4160,18 @@ private fun CleanVersionsViewport(
                         showDeleteAllConfirmDialog = false
                         HorizonNativeBridge.deleteAllMinecraftAssets(context, true)
                         sizeRefreshTick += 1
-                        deleteResultPopupMessage = "Seluruh aset Minecraft 26.3 berhasil dihapus total dari perangkat. Status aset kini direset ke 0 MB (Belum Terpasang)."
+                        deleteResultPopupMessage = LauncherText.get(R.string.all_minecraft_26_3_assets_were_completely)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
                 ) {
                     Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                     Spacer(Modifier.width(5.dp))
-                    Text("Ya, Hapus Total", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.yes_delete_everything), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteAllConfirmDialog = false }) {
-                    Text("Batal", fontSize = 12.sp, color = MutedSubtitleText)
+                    Text(LauncherText.get(R.string.cancel), fontSize = 12.sp, color = MutedSubtitleText)
                 }
             }
         )
@@ -4174,7 +4182,7 @@ private fun CleanVersionsViewport(
             onDismissRequest = { deleteResultPopupMessage = null },
             containerColor = Color(0xFF1F262B),
             icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = SkyBlueAccent) },
-            title = { Text("Aset Berhasil Dihapus Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
+            title = { Text(LauncherText.get(R.string.assets_completely_deleted), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White) },
             text = {
                 Text(
                     text = msg,
@@ -4188,7 +4196,7 @@ private fun CleanVersionsViewport(
                     onClick = { deleteResultPopupMessage = null },
                     colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                 ) {
-                    Text("Selesai", color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.done), color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
         )
@@ -4212,13 +4220,13 @@ private fun CleanVersionsViewport(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = "Game & Assets Minecraft",
+                    text = LauncherText.get(R.string.game_assets_minecraft),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Text(
-                    text = "Kelola instalasi aset resmi, perbaikan otomatis (Repair), atau hapus total aset",
+                    text = LauncherText.get(R.string.manage_the_official_asset_installation_automatic_repair),
                     fontSize = 11.sp,
                     color = MutedSubtitleText
                 )
@@ -4255,14 +4263,14 @@ private fun CleanVersionsViewport(
                                     fontSize = 15.sp,
                                     color = Color.White
                                 )
-                                LavenderTagBadge(text = "Rust Engine")
-                                LavenderTagBadge(text = "v0.7.6 Base")
+                                LavenderTagBadge(text = LauncherText.get(R.string.rust_engine))
+                                LavenderTagBadge(text = LauncherText.get(R.string.v0_7_6_base))
                             }
                             Text(
                                 text = when {
-                                    installStatus.ready -> "Aset lengkap terpasang • Siap langsung masuk ke dalam game"
+                                    installStatus.ready -> LauncherText.get(R.string.assets_fully_installed_ready_to_jump_into)
                                     installStatus.running -> "${installStatus.stage} ${if (installStatus.speedText.isNotBlank()) "• ${installStatus.speedText}" else ""}"
-                                    else -> "Unduh paket aset resmi Mojang untuk mulai bermain Minecraft 26.3"
+                                    else -> LauncherText.get(R.string.download_the_official_mojang_asset_package_to)
                                 },
                                 fontSize = 11.sp,
                                 color = if (installStatus.ready) Color(0xFF81C784) else MutedSubtitleText,
@@ -4286,9 +4294,9 @@ private fun CleanVersionsViewport(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                Text("Status Aset", fontSize = 10.sp, color = MutedSubtitleText)
+                                Text(LauncherText.get(R.string.asset_status), fontSize = 10.sp, color = MutedSubtitleText)
                                 Text(
-                                    text = if (installStatus.ready) "Lengkap (100%)" else "${installStatus.percent}% Terunduh",
+                                    text = if (installStatus.ready) LauncherText.get(R.string.complete_100) else LauncherText.get(R.string.downloaded, installStatus.percent),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (installStatus.ready) Color(0xFF81C784) else Color.White,
@@ -4306,9 +4314,9 @@ private fun CleanVersionsViewport(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                Text("Komponen", fontSize = 10.sp, color = MutedSubtitleText)
+                                Text(LauncherText.get(R.string.components), fontSize = 10.sp, color = MutedSubtitleText)
                                 Text(
-                                    text = "Worldgen + 60 Touch",
+                                    text = LauncherText.get(R.string.worldgen_60_touch),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SkyBlueAccent,
@@ -4326,7 +4334,7 @@ private fun CleanVersionsViewport(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                Text("Ukuran Aset", fontSize = 10.sp, color = MutedSubtitleText)
+                                Text(LauncherText.get(R.string.asset_size), fontSize = 10.sp, color = MutedSubtitleText)
                                 Text(
                                     text = installedSizeText,
                                     fontSize = 12.sp,
@@ -4347,7 +4355,7 @@ private fun CleanVersionsViewport(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = if (isRepairRunning) "Memverifikasi & Memperbaiki File..." else installStatus.stage,
+                                    text = if (isRepairRunning) LauncherText.get(R.string.verifying_repairing_files) else installStatus.stage,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = if (installStatus.paused) Color(0xFFFFB74D) else SkyBlueAccent,
@@ -4425,7 +4433,7 @@ private fun CleanVersionsViewport(
                                     )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = if (installStatus.paused) "Lanjutkan Download" else "Jeda (Pause)",
+                                        text = if (installStatus.paused) LauncherText.get(R.string.resume_download) else LauncherText.get(R.string.pause),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SkyBlueDarkText,
@@ -4449,7 +4457,7 @@ private fun CleanVersionsViewport(
                                     Icon(Icons.Default.Cancel, contentDescription = null, tint = Color(0xFFFF8A80), modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = "Batalkan Download",
+                                        text = LauncherText.get(R.string.cancel_download_2),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFFFF8A80),
@@ -4485,7 +4493,7 @@ private fun CleanVersionsViewport(
                                     )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = if (installStatus.ready) "Verifikasi Aset" else "Download Aset",
+                                        text = if (installStatus.ready) LauncherText.get(R.string.verify_assets) else LauncherText.get(R.string.download_assets),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SkyBlueDarkText,
@@ -4515,7 +4523,7 @@ private fun CleanVersionsViewport(
                                     )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = "Repair Aset",
+                                        text = LauncherText.get(R.string.repair_assets),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
@@ -4545,7 +4553,7 @@ private fun CleanVersionsViewport(
                                     )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = "Hapus Total Aset",
+                                        text = LauncherText.get(R.string.delete_all_assets),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFFFF8A80),
@@ -4582,7 +4590,7 @@ private fun CleanVersionsViewport(
                                         tint = SkyBlueAccent
                                     )
                                     Text(
-                                        text = "Detail Log Aktivitas Aset",
+                                        text = LauncherText.get(R.string.asset_activity_log_details),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = Color(0xFFD5DEE5)
@@ -4594,7 +4602,7 @@ private fun CleanVersionsViewport(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(
-                                        text = "Salin Log",
+                                        text = LauncherText.get(R.string.copy_log),
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SkyBlueAccent,
@@ -4602,7 +4610,7 @@ private fun CleanVersionsViewport(
                                             val textToCopy = if (installStatus.logs.isNotEmpty()) {
                                                 installStatus.logs.joinToString("\n")
                                             } else {
-                                                "Stage: ${installStatus.stage} (${installStatus.percent}%)"
+                                                LauncherText.get(R.string.stage, installStatus.stage, installStatus.percent)
                                             }
                                             HorizonNativeBridge.copyToClipboard(context, "Download Log", textToCopy)
                                         }
@@ -4626,9 +4634,9 @@ private fun CleanVersionsViewport(
                                 val logContent = if (installStatus.logs.isNotEmpty()) {
                                     installStatus.logs.takeLast(25).joinToString("\n")
                                 } else if (installStatus.ready) {
-                                    "[OK] Minecraft 26.3 assets, worldgen tables, and 60/60 touch controls verified."
+                                    LauncherText.get(R.string.ok_minecraft_26_3_assets_worldgen_tables)
                                 } else {
-                                    "Tekan 'Download Aset' untuk mengunduh atau 'Repair Aset' untuk memeriksa file."
+                                    LauncherText.get(R.string.press_download_assets_to_download_or_repair)
                                 }
                                 Box(
                                     modifier = Modifier
@@ -4710,7 +4718,7 @@ private fun CleanStoreViewport(
             refreshTrigger += 1
             Toast.makeText(
                 context,
-                if (packOk) "Horizon Modpack (.hpack) berhasil diimpor!" else "Gagal mengimpor Horizon Modpack (.hpack).",
+                if (packOk) LauncherText.get(R.string.horizon_modpack_hpack_imported_successfully) else LauncherText.get(R.string.failed_to_import_horizon_modpack_hpack),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -4779,10 +4787,10 @@ private fun CleanStoreViewport(
         AlertDialog(
             onDismissRequest = { pendingIncompatibleItem = null },
             icon = { Icon(Icons.Default.WarningAmber, contentDescription = null, tint = Color(0xFFFFB74D)) },
-            title = { Text("Peringatan Versi Minecraft", style = MaterialTheme.typography.titleMedium) },
+            title = { Text(LauncherText.get(R.string.minecraft_version_warning), style = MaterialTheme.typography.titleMedium) },
             text = {
                 Text(
-                    "Item '${item.title}' tercatat untuk Minecraft versi ${item.versionBadge} (sedangkan engine saat ini adalah Minecraft 26.3).\n\nApakah Anda ingin tetap mengunduh dan memasangnya?",
+                    LauncherText.get(R.string.item_is_listed_for_minecraft_version_while, item.title, item.versionBadge),
                     fontSize = 13.sp
                 )
             },
@@ -4795,12 +4803,12 @@ private fun CleanStoreViewport(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                 ) {
-                    Text("Tetap Download", fontSize = 12.sp, color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
+                    Text(LauncherText.get(R.string.download_anyway), fontSize = 12.sp, color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingIncompatibleItem = null }) {
-                    Text("Cancel", fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.cancel), fontSize = 12.sp)
                 }
             }
         )
@@ -4810,10 +4818,10 @@ private fun CleanStoreViewport(
         AlertDialog(
             onDismissRequest = { showCancelStoreDialog = false },
             icon = { Icon(Icons.Default.Cancel, contentDescription = null, tint = Color(0xFFFF6E6E)) },
-            title = { Text("Batalkan Download Store?", style = MaterialTheme.typography.titleMedium) },
+            title = { Text(LauncherText.get(R.string.cancel_store_download), style = MaterialTheme.typography.titleMedium) },
             text = {
                 Text(
-                    "File '${storeProgress.activeTitle}' yang sedang diunduh akan dihentikan dan file sementara (.part) akan langsung dihapus.",
+                    LauncherText.get(R.string.the_file_currently_downloading_will_be_stopped, storeProgress.activeTitle),
                     fontSize = 13.sp
                 )
             },
@@ -4826,12 +4834,12 @@ private fun CleanStoreViewport(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
                 ) {
-                    Text("Ya, Batalkan & Hapus", color = Color.White, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.yes_cancel_delete), color = Color.White, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCancelStoreDialog = false }) {
-                    Text("Lanjutkan", fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.continue_text), fontSize = 12.sp)
                 }
             }
         )
@@ -4912,7 +4920,7 @@ private fun CleanStoreViewport(
                                         color = SubRailCapsuleActive
                                     ) {
                                         Text(
-                                            text = "HORIZON REGISTRY",
+                                            text = LauncherText.get(R.string.horizon_registry),
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = SkyBlueAccent,
@@ -4920,7 +4928,7 @@ private fun CleanStoreViewport(
                                         )
                                     }
                                     Text(
-                                        text = "${catalogItems.size} of $totalHits • playhorizon.dev/mods",
+                                        text = LauncherText.get(R.string.of_playhorizon_dev_mods, catalogItems.size, totalHits),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MutedSubtitleText,
@@ -4944,7 +4952,7 @@ private fun CleanStoreViewport(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.ChevronLeft,
-                                                contentDescription = "Previous",
+                                                contentDescription = LauncherText.get(R.string.previous),
                                                 tint = if (currentPage > 1) Color.White else MutedSubtitleText.copy(alpha = 0.4f),
                                                 modifier = Modifier
                                                     .size(16.dp)
@@ -4960,7 +4968,7 @@ private fun CleanStoreViewport(
                                             )
                                             Icon(
                                                 imageVector = Icons.Default.ChevronRight,
-                                                contentDescription = "Next",
+                                                contentDescription = LauncherText.get(R.string.next),
                                                 tint = if (currentPage < totalPages) Color.White else MutedSubtitleText.copy(alpha = 0.4f),
                                                 modifier = Modifier
                                                     .size(16.dp)
@@ -4973,7 +4981,7 @@ private fun CleanStoreViewport(
 
                                     Icon(
                                         imageVector = Icons.Default.Refresh,
-                                        contentDescription = "Refresh Registry",
+                                        contentDescription = LauncherText.get(R.string.refresh_registry),
                                         tint = Color.White,
                                         modifier = Modifier
                                             .size(18.dp)
@@ -5001,7 +5009,7 @@ private fun CleanStoreViewport(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                text = "Downloading ${storeProgress.activeTitle} (${storeProgress.percent}%)",
+                                                text = LauncherText.get(R.string.downloading, storeProgress.activeTitle, storeProgress.percent),
                                                 fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White,
@@ -5025,7 +5033,7 @@ private fun CleanStoreViewport(
                                                 }
                                             ) {
                                                 Text(
-                                                    text = if (storeProgress.paused) "Resume" else "Pause",
+                                                    text = if (storeProgress.paused) LauncherText.get(R.string.resume) else LauncherText.get(R.string.pause),
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = SkyBlueDarkText,
@@ -5038,7 +5046,7 @@ private fun CleanStoreViewport(
                                                 modifier = Modifier.animatedPressScale { showCancelStoreDialog = true }
                                             ) {
                                                 Text(
-                                                    text = "Cancel",
+                                                    text = LauncherText.get(R.string.cancel),
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.SemiBold,
                                                     color = Color(0xFFFF8A80),
@@ -5078,7 +5086,7 @@ private fun CleanStoreViewport(
                                     color = CardSlateBg
                                 ) {
                                     Text(
-                                        text = "No projects found on playhorizon.dev/mods matching your filter.",
+                                        text = LauncherText.get(R.string.no_projects_found_on_playhorizon_dev_mods),
                                         fontSize = 12.sp,
                                         color = MutedSubtitleText,
                                         modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
@@ -5204,8 +5212,8 @@ private fun CleanStoreViewport(
                                                                 verticalAlignment = Alignment.CenterVertically,
                                                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                                                             ) {
-                                                                Icon(Icons.Default.Cancel, contentDescription = "Cancel", tint = Color(0xFFFF8A80), modifier = Modifier.size(14.dp))
-                                                                Text("${storeProgress.percent}% Cancel", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF8A80))
+                                                                Icon(Icons.Default.Cancel, contentDescription = LauncherText.get(R.string.cancel), tint = Color(0xFFFF8A80), modifier = Modifier.size(14.dp))
+                                                                Text(LauncherText.get(R.string.cancel_2, storeProgress.percent), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF8A80))
                                                             }
                                                         }
                                                     }
@@ -5224,8 +5232,8 @@ private fun CleanStoreViewport(
                                                                 verticalAlignment = Alignment.CenterVertically,
                                                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                                                             ) {
-                                                                Icon(Icons.Default.SystemUpdateAlt, contentDescription = "Update", tint = Color(0xFF261600), modifier = Modifier.size(14.dp))
-                                                                Text("Update", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF261600))
+                                                                Icon(Icons.Default.SystemUpdateAlt, contentDescription = LauncherText.get(R.string.update), tint = Color(0xFF261600), modifier = Modifier.size(14.dp))
+                                                                Text(LauncherText.get(R.string.update), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF261600))
                                                             }
                                                         }
                                                         Text(
@@ -5250,13 +5258,13 @@ private fun CleanStoreViewport(
                                                                     verticalAlignment = Alignment.CenterVertically,
                                                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                                                 ) {
-                                                                    Icon(Icons.Default.CheckCircle, contentDescription = "Installed", tint = Color(0xFF81C784), modifier = Modifier.size(14.dp))
-                                                                    Text("Installed", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF81C784))
+                                                                    Icon(Icons.Default.CheckCircle, contentDescription = LauncherText.get(R.string.installed), tint = Color(0xFF81C784), modifier = Modifier.size(14.dp))
+                                                                    Text(LauncherText.get(R.string.installed), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF81C784))
                                                                 }
                                                             }
                                                             Icon(
                                                                 imageVector = Icons.Outlined.Delete,
-                                                                contentDescription = "Uninstall",
+                                                                contentDescription = LauncherText.get(R.string.uninstall),
                                                                 tint = Color(0xFFFF8A80),
                                                                 modifier = Modifier
                                                                     .size(18.dp)
@@ -5282,8 +5290,8 @@ private fun CleanStoreViewport(
                                                                 verticalAlignment = Alignment.CenterVertically,
                                                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                                                             ) {
-                                                                Icon(Icons.Default.Download, contentDescription = "Install", tint = SkyBlueDarkText, modifier = Modifier.size(14.dp))
-                                                                Text("Install", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
+                                                                Icon(Icons.Default.Download, contentDescription = LauncherText.get(R.string.install), tint = SkyBlueDarkText, modifier = Modifier.size(14.dp))
+                                                                Text(LauncherText.get(R.string.install), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SkyBlueDarkText)
                                                             }
                                                         }
                                                     }
@@ -5306,7 +5314,7 @@ private fun CleanStoreViewport(
                     ) {
                         StoreRightSearchPill(
                             value = searchQuery,
-                            placeholder = "Search Horizon mods...",
+                            placeholder = LauncherText.get(R.string.search_horizon_mods),
                             onValueChange = {
                                 searchQuery = it
                                 currentPage = 1
@@ -5315,7 +5323,7 @@ private fun CleanStoreViewport(
 
                         StoreRightSearchPill(
                             value = gameVersionQuery,
-                            placeholder = "Game Version (26.3)",
+                            placeholder = LauncherText.get(R.string.game_version_26_3),
                             onValueChange = {
                                 gameVersionQuery = it
                                 currentPage = 1
@@ -5339,7 +5347,7 @@ private fun CleanStoreViewport(
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = null, tint = SkyBlueAccent, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(5.dp))
-                                    Text("Import .hpack Modpack", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                    Text(LauncherText.get(R.string.import_hpack_modpack), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                 }
                             }
                         }
@@ -5360,7 +5368,7 @@ private fun CleanStoreViewport(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Text("Sort By", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                        Text(LauncherText.get(R.string.sort_by), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                         LavenderTagBadge(text = sortOption.label)
                                     }
                                     Icon(
@@ -5423,7 +5431,7 @@ private fun CleanStoreViewport(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Text("Filter Status", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                        Text(LauncherText.get(R.string.filter_status), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                         LavenderTagBadge(text = statusFilter.label)
                                     }
                                     Icon(
@@ -5481,13 +5489,13 @@ private fun CleanStoreViewport(
                                 verticalArrangement = Arrangement.spacedBy(7.dp)
                             ) {
                                 Text(
-                                    text = "Horizon Mods Portal",
+                                    text = LauncherText.get(R.string.horizon_mods_portal),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "Reviewed mods, native mods, modpacks, resource packs & WGSL shaders for Horizon 26.3.",
+                                    text = LauncherText.get(R.string.reviewed_mods_native_mods_modpacks_resource_packs),
                                     fontSize = 10.sp,
                                     color = MutedSubtitleText,
                                     lineHeight = 13.sp
@@ -5508,7 +5516,7 @@ private fun CleanStoreViewport(
                                             }
                                     ) {
                                         Text(
-                                            text = "Submit yours",
+                                            text = LauncherText.get(R.string.submit_yours),
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
@@ -5529,7 +5537,7 @@ private fun CleanStoreViewport(
                                             }
                                     ) {
                                         Text(
-                                            text = "Make a mod",
+                                            text = LauncherText.get(R.string.make_a_mod),
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
@@ -5580,8 +5588,8 @@ private fun CleanStoreViewport(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SkyBlueAccent, modifier = Modifier.size(15.dp))
-                                        Text("Back to List", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                        Icon(Icons.Default.ArrowBack, contentDescription = LauncherText.get(R.string.back), tint = SkyBlueAccent, modifier = Modifier.size(15.dp))
+                                        Text(LauncherText.get(R.string.back_to_list), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                     }
                                 }
 
@@ -5602,7 +5610,7 @@ private fun CleanStoreViewport(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "Show Only MC Releases",
+                                            text = LauncherText.get(R.string.show_only_mc_releases),
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = Color.White
@@ -5624,7 +5632,7 @@ private fun CleanStoreViewport(
                                         contentAlignment = Alignment.CenterStart
                                     ) {
                                         if (searchMcVersionsQuery.isEmpty()) {
-                                            Text("Search MC Versions", fontSize = 11.sp, color = MutedSubtitleText)
+                                            Text(LauncherText.get(R.string.search_mc_versions), fontSize = 11.sp, color = MutedSubtitleText)
                                         }
                                         BasicTextField(
                                             value = searchMcVersionsQuery,
@@ -5740,7 +5748,7 @@ private fun CleanStoreViewport(
                                                                             if (isThisExactVerInstalled) {
                                                                                 Toast.makeText(
                                                                                     context,
-                                                                                    "${detailProj.title} v${rel.versionNumber} sudah terpasang (tidak perlu instal ulang).",
+                                                                                    LauncherText.get(R.string.v_is_already_installed_no_reinstall_needed, detailProj.title, rel.versionNumber),
                                                                                     Toast.LENGTH_SHORT
                                                                                 ).show()
                                                                             } else {
@@ -5814,9 +5822,9 @@ private fun CleanStoreViewport(
                                                                         ) {
                                                                             Text(
                                                                                 text = when {
-                                                                                    isThisExactVerInstalled -> "✓ Installed"
-                                                                                    installedVerForProj != null -> "↑ Update"
-                                                                                    else -> "Install"
+                                                                                    isThisExactVerInstalled -> LauncherText.get(R.string.installed_2)
+                                                                                    installedVerForProj != null -> LauncherText.get(R.string.update_2)
+                                                                                    else -> LauncherText.get(R.string.install)
                                                                                 },
                                                                                 fontSize = 10.sp,
                                                                                 fontWeight = FontWeight.Bold,
@@ -5884,12 +5892,12 @@ private fun CleanStoreViewport(
                                     ) {
                                         Icon(
                                             imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                            contentDescription = "Favorite",
+                                            contentDescription = LauncherText.get(R.string.favorite),
                                             tint = if (isFav) Color(0xFFFF6E6E) else Color.White,
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
-                                            text = if (isFav) "Favorited" else "Favorite",
+                                            text = if (isFav) LauncherText.get(R.string.favorited) else LauncherText.get(R.string.favorite),
                                             fontSize = 10.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = if (isFav) Color(0xFFFFB4B4) else Color.White,
@@ -5917,7 +5925,7 @@ private fun CleanStoreViewport(
                             )
 
                             Text(
-                                text = "v${detailProj.version} · By ${detailProj.author} · ${detailProj.license}",
+                                text = LauncherText.get(R.string.v_by, detailProj.version, detailProj.author, detailProj.license),
                                 fontSize = 10.sp,
                                 color = SkyBlueAccent,
                                 textAlign = TextAlign.Center
@@ -5944,7 +5952,7 @@ private fun CleanStoreViewport(
                                             StoreInstallState.INSTALLED -> {
                                                 Toast.makeText(
                                                     context,
-                                                    "${detailProj.title} (v${installedMap[detailProj.id] ?: detailProj.version}) sudah terpasang.",
+                                                    LauncherText.get(R.string.v_is_already_installed, detailProj.title, installedMap[detailProj.id] ?: detailProj.version),
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             }
@@ -5977,9 +5985,9 @@ private fun CleanStoreViewport(
                                     Spacer(Modifier.width(5.dp))
                                     Text(
                                         text = when (detailInstallState) {
-                                            StoreInstallState.INSTALLED -> "✓ Installed (v${installedMap[detailProj.id] ?: detailProj.version})"
-                                            StoreInstallState.UPDATE_AVAILABLE -> "↑ Update (${installedMap[detailProj.id] ?: "old"} → v${detailProj.version})"
-                                            StoreInstallState.NOT_INSTALLED -> "Install v${detailProj.version}"
+                                            StoreInstallState.INSTALLED -> LauncherText.get(R.string.installed_v_2, installedMap[detailProj.id] ?: detailProj.version)
+                                            StoreInstallState.UPDATE_AVAILABLE -> LauncherText.get(R.string.update_v, installedMap[detailProj.id] ?: "old", detailProj.version)
+                                            StoreInstallState.NOT_INSTALLED -> LauncherText.get(R.string.install_v, detailProj.version)
                                         },
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
@@ -6010,7 +6018,7 @@ private fun CleanStoreViewport(
                                     ) {
                                         Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color(0xFFFF8A80), modifier = Modifier.size(15.dp))
                                         Spacer(Modifier.width(5.dp))
-                                        Text("Uninstall from Horizon", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF8A80))
+                                        Text(LauncherText.get(R.string.uninstall_from_horizon), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF8A80))
                                     }
                                 }
                             }
@@ -6020,7 +6028,7 @@ private fun CleanStoreViewport(
                                 verticalArrangement = Arrangement.spacedBy(7.dp)
                             ) {
                                 Text(
-                                    text = "Related Links",
+                                    text = LauncherText.get(R.string.related_links),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
@@ -6040,7 +6048,7 @@ private fun CleanStoreViewport(
                                             .padding(vertical = 2.dp)
                                     ) {
                                         Icon(Icons.Default.Language, contentDescription = null, tint = Color(0xFFD5DEE5), modifier = Modifier.size(15.dp))
-                                        Text("playhorizon.dev Page", fontSize = 11.sp, color = Color(0xFFD5DEE5))
+                                        Text(LauncherText.get(R.string.playhorizon_dev_page), fontSize = 11.sp, color = Color(0xFFD5DEE5))
                                     }
                                 }
 
@@ -6058,7 +6066,7 @@ private fun CleanStoreViewport(
                                             .padding(vertical = 2.dp)
                                     ) {
                                         Icon(Icons.Default.Code, contentDescription = null, tint = Color(0xFFD5DEE5), modifier = Modifier.size(15.dp))
-                                        Text("View Source Code", fontSize = 11.sp, color = Color(0xFFD5DEE5))
+                                        Text(LauncherText.get(R.string.view_source_code), fontSize = 11.sp, color = Color(0xFFD5DEE5))
                                     }
                                 }
                             }
@@ -6207,9 +6215,9 @@ private data class ManagerRowUiItem(
 )
 
 enum class FilesSortMode(val label: String) {
-    BY_NAME("Sort by Name"),
-    BY_FILE_NAME("Sort by File Name"),
-    BY_LAST_MODIFIED("Sort by Last Updated")
+    BY_NAME(LauncherText.get(R.string.sort_by_name)),
+    BY_FILE_NAME(LauncherText.get(R.string.sort_by_file_name)),
+    BY_LAST_MODIFIED(LauncherText.get(R.string.sort_by_last_updated))
 }
 
 private data class PendingDeleteTarget(
@@ -6256,12 +6264,12 @@ private fun CleanFilesViewport(
     var pendingDeleteTarget by remember { mutableStateOf<PendingDeleteTarget?>(null) }
 
     val categories = listOf(
-        Triple("mods", "Mods", Icons.Default.Extension),
-        Triple("modpacks", "Modpacks", Icons.Default.Inventory2),
-        Triple("saves", "Saves", Icons.Default.Public),
-        Triple("resourcepacks", "Resource Packs", Icons.Default.Brush),
-        Triple("shaderpacks", "Shader Packs", Icons.Default.Lightbulb),
-        Triple("screenshots", "Screenshots", Icons.Default.Image)
+        Triple("mods", LauncherText.get(R.string.mods), Icons.Default.Extension),
+        Triple("modpacks", LauncherText.get(R.string.modpacks), Icons.Default.Inventory2),
+        Triple("saves", LauncherText.get(R.string.saves), Icons.Default.Public),
+        Triple("resourcepacks", LauncherText.get(R.string.resource_packs), Icons.Default.Brush),
+        Triple("shaderpacks", LauncherText.get(R.string.shader_packs), Icons.Default.Lightbulb),
+        Triple("screenshots", LauncherText.get(R.string.screenshots), Icons.Default.Image)
     )
 
     var filteredList by remember { mutableStateOf<List<ManagerRowUiItem>>(emptyList()) }
@@ -6371,10 +6379,10 @@ private fun CleanFilesViewport(
                     else -> file.nameWithoutExtension.replace("-", " ").replace("_", " ")
                 }
                 val subtitleText = when {
-                    modDetail != null -> "${modDetail.description} • by ${modDetail.author} (${modDetail.fileName})"
-                    saveDetail != null -> "Last played: ${saveDetail.lastPlayedFormatted}"
+                    modDetail != null -> LauncherText.get(R.string.by, modDetail.description, modDetail.author, modDetail.fileName)
+                    saveDetail != null -> LauncherText.get(R.string.last_played, saveDetail.lastPlayedFormatted)
                     packDetail != null -> packDetail.description
-                    else -> "File Name: ${file.name}"
+                    else -> LauncherText.get(R.string.file_name, file.name)
                 }
 
                 val matchesQuery = searchQuery.isBlank() ||
@@ -6388,10 +6396,10 @@ private fun CleanFilesViewport(
                 } else {
                     val iconBmp = HorizonNativeBridge.loadLocalContentIconBitmap(file)?.asImageBitmap()
                     val detailSummary = when {
-                        modDetail != null -> "ID: ${modDetail.modId} • API ${modDetail.apiLine} • Side: ${modDetail.side} • Size: ${modDetail.fileSizeFormatted}"
-                        packDetail != null -> "${packDetail.packType} • Format v${packDetail.formatVersion} • Size: ${packDetail.fileSizeFormatted}"
-                        saveDetail != null -> "${saveDetail.difficulty} • ${saveDetail.playTimeFormatted} • Seed: ${saveDetail.worldSeed}"
-                        else -> "File: ${file.name} (${file.length() / 1024} KB)"
+                        modDetail != null -> LauncherText.get(R.string.id_api_side_size, modDetail.modId, modDetail.apiLine, modDetail.side, modDetail.fileSizeFormatted)
+                        packDetail != null -> LauncherText.get(R.string.format_v_size, packDetail.packType, packDetail.formatVersion, packDetail.fileSizeFormatted)
+                        saveDetail != null -> LauncherText.get(R.string.seed, saveDetail.difficulty, saveDetail.playTimeFormatted, saveDetail.worldSeed)
+                        else -> LauncherText.get(R.string.file_kb, file.name, file.length() / 1024)
                     }
                     val catMatch = HorizonNativeBridge.findCatalogItemForLocalFile(file, folderSnap)
                     val cleanFileId = HorizonNativeBridge.sanitizeModId(file.name)
@@ -6467,7 +6475,7 @@ private fun CleanFilesViewport(
                 refreshCount += 1
                 Toast.makeText(
                     context,
-                    if (ok) "Berhasil mengimpor ke $folderSnap & menyinkronkan ke engine!" else "Gagal mengimpor file.",
+                    if (ok) LauncherText.get(R.string.imported_into_synced_to_the_engine, folderSnap) else LauncherText.get(R.string.failed_to_import_the_file),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -6479,12 +6487,12 @@ private fun CleanFilesViewport(
         AlertDialog(
             onDismissRequest = { renameTargetFile = null },
             icon = { Icon(Icons.Default.Edit, contentDescription = null, tint = SkyBlueAccent) },
-            title = { Text("Ubah Nama ${target.name}", style = MaterialTheme.typography.titleMedium) },
+            title = { Text(LauncherText.get(R.string.rename, target.name), style = MaterialTheme.typography.titleMedium) },
             text = {
                 OutlinedTextField(
                     value = renameInputText,
                     onValueChange = { renameInputText = it },
-                    label = { Text("Nama Baru", fontSize = 12.sp) },
+                    label = { Text(LauncherText.get(R.string.new_name), fontSize = 12.sp) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -6499,12 +6507,12 @@ private fun CleanFilesViewport(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                 ) {
-                    Text("Simpan", color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.save), color = SkyBlueDarkText, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { renameTargetFile = null }) {
-                    Text("Batal", fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.cancel), fontSize = 12.sp)
                 }
             }
         )
@@ -6523,14 +6531,14 @@ private fun CleanFilesViewport(
             },
             title = {
                 Text(
-                    text = "Hapus ${delTarget.displayTitle}?",
+                    text = LauncherText.get(R.string.delete, delTarget.displayTitle),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "Apakah Anda yakin ingin menghapus '${delTarget.file.name}' dari kategori ${delTarget.folderLabel}?\n\nFile ini akan dihapus secara permanen dari perangkat dan statusnya di Store akan otomatis direset menjadi belum terpasang.",
+                    text = LauncherText.get(R.string.are_you_sure_you_want_to_delete, delTarget.file.name, delTarget.folderLabel),
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )
@@ -6550,7 +6558,7 @@ private fun CleanFilesViewport(
                         refreshCount += 1
                         Toast.makeText(
                             context,
-                            "${target.displayTitle} berhasil dihapus.",
+                            LauncherText.get(R.string.deleted_successfully, target.displayTitle),
                             Toast.LENGTH_SHORT
                         ).show()
                     },
@@ -6558,12 +6566,12 @@ private fun CleanFilesViewport(
                 ) {
                     Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                     Spacer(Modifier.width(5.dp))
-                    Text("Ya, Hapus Permanen", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.yes_delete_permanently), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingDeleteTarget = null }) {
-                    Text("Batal", fontSize = 12.sp)
+                    Text(LauncherText.get(R.string.cancel), fontSize = 12.sp)
                 }
             }
         )
@@ -6605,7 +6613,7 @@ private fun CleanFilesViewport(
                     if (currentFolder == "mods") {
                         Icon(
                             imageVector = Icons.Default.FilterAlt,
-                            contentDescription = "Filter Enabled Mods",
+                            contentDescription = LauncherText.get(R.string.filter_enabled_mods),
                             tint = if (filterEnabledOnly) SkyBlueAccent else Color.White,
                             modifier = Modifier
                                 .size(19.dp)
@@ -6617,7 +6625,7 @@ private fun CleanFilesViewport(
                     Box {
                         Icon(
                             imageVector = Icons.Default.Sort,
-                            contentDescription = "Sort",
+                            contentDescription = LauncherText.get(R.string.sort),
                             tint = Color.White,
                             modifier = Modifier
                                 .size(19.dp)
@@ -6664,7 +6672,7 @@ private fun CleanFilesViewport(
                         ) {
                             if (searchQuery.isEmpty()) {
                                 Text(
-                                    text = "Search ${categories.first { it.first == currentFolder }.second.lowercase(Locale.US)}...",
+                                    text = LauncherText.get(R.string.search, categories.first { it.first == currentFolder }.second.lowercase(Locale.US)),
                                     fontSize = 12.sp,
                                     color = MutedSubtitleText
                                 )
@@ -6686,7 +6694,7 @@ private fun CleanFilesViewport(
                         color = CardRowBg
                     ) {
                         Text(
-                            text = "${filteredList.size} items",
+                            text = LauncherText.get(R.string.items, filteredList.size),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = SkyBlueAccent,
@@ -6710,7 +6718,7 @@ private fun CleanFilesViewport(
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Active", fontSize = 11.sp, color = Color.White)
+                            Text(LauncherText.get(R.string.active), fontSize = 11.sp, color = Color.White)
                         }
                     }
 
@@ -6724,9 +6732,9 @@ private fun CleanFilesViewport(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Import", tint = SkyBlueAccent, modifier = Modifier.size(15.dp))
+                            Icon(Icons.Default.Add, contentDescription = LauncherText.get(R.string.import_text), tint = SkyBlueAccent, modifier = Modifier.size(15.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Import", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            Text(LauncherText.get(R.string.import_text), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                         }
                     }
 
@@ -6749,22 +6757,22 @@ private fun CleanFilesViewport(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
-                            Icon(Icons.Default.Download, contentDescription = "Store", tint = SkyBlueAccent, modifier = Modifier.size(15.dp))
+                            Icon(Icons.Default.Download, contentDescription = LauncherText.get(R.string.store), tint = SkyBlueAccent, modifier = Modifier.size(15.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Store", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = SkyBlueAccent)
+                            Text(LauncherText.get(R.string.store), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = SkyBlueAccent)
                         }
                     }
 
                     // `↻` Refresh & Auto-Repair icon button
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh & Sync",
+                        contentDescription = LauncherText.get(R.string.refresh_sync),
                         tint = Color.White,
                         modifier = Modifier
                             .size(20.dp)
                             .animatedPressScale {
                                 refreshCount += 1
-                                Toast.makeText(context, "Folder ${currentFolder} disinkronkan & diverifikasi!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, LauncherText.get(R.string.folder_synced_verified, currentFolder), Toast.LENGTH_SHORT).show()
                             }
                     )
                 }
@@ -6789,13 +6797,13 @@ private fun CleanFilesViewport(
                     val folderItems = remember(filteredList, folder) { filteredList.filter { it.folder == folder } }
                     if (folderItems.isEmpty()) {
                         val emptyLabel = when (folder) {
-                            "mods" -> "Belum ada mod terpasang untuk profil ini (Klik 'Store' untuk mengunduh dari playhorizon.dev/mods)"
-                            "modpacks" -> "Belum ada Modpack (.hpack) terpasang untuk profil ini (Klik 'Store' untuk mengunduh Modpack)"
-                            "saves" -> "Belum ada dunia (World Save) untuk versi 26.3"
-                            "resourcepacks" -> "Belum ada Resource Pack untuk versi 26.3"
-                            "shaderpacks" -> "Belum ada Shader Pack (.hshader) untuk versi 26.3"
-                            "screenshots" -> "Belum ada tangkapan layar (Screenshots)"
-                            else -> "Tidak ada item di folder ini"
+                            "mods" -> LauncherText.get(R.string.no_mods_installed_for_this_profile_yet)
+                            "modpacks" -> LauncherText.get(R.string.no_modpacks_hpack_installed_for_this_profile)
+                            "saves" -> LauncherText.get(R.string.no_worlds_world_saves_for_version_26)
+                            "resourcepacks" -> LauncherText.get(R.string.no_resource_packs_for_version_26_3)
+                            "shaderpacks" -> LauncherText.get(R.string.no_shader_packs_hshader_for_version_26)
+                            "screenshots" -> LauncherText.get(R.string.no_screenshots_yet)
+                            else -> LauncherText.get(R.string.no_items_in_this_folder)
                         }
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Surface(
@@ -6946,7 +6954,7 @@ private fun FileManagerRowCard(
                                         color = Color(0xFFFFB74D),
                                         modifier = Modifier.clickable {
                                             val targetItem = rowItem.storeCatalogMatch
-                                            Toast.makeText(context, "Mengupdate ${targetItem.title} ke v${targetItem.version}...", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, LauncherText.get(R.string.updating_to_v, targetItem.title, targetItem.version), Toast.LENGTH_SHORT).show()
                                             HorizonNativeBridge.downloadAndInstallStoreItem(
                                                 context = context,
                                                 item = targetItem,
@@ -6963,7 +6971,7 @@ private fun FileManagerRowCard(
                                         }
                                     ) {
                                         Text(
-                                            text = "↑ Update v${rowItem.storeCatalogMatch.version}",
+                                            text = LauncherText.get(R.string.update_v_2, rowItem.storeCatalogMatch.version),
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = Color(0xFF261600),
@@ -6976,7 +6984,7 @@ private fun FileManagerRowCard(
                                     color = if (isEnabled) Color(0xFF1E3E29) else Color(0xFF3A2326)
                                 ) {
                                     Text(
-                                        text = if (isEnabled) "ON" else "OFF",
+                                        text = if (isEnabled) LauncherText.get(R.string.on) else LauncherText.get(R.string.off),
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = if (isEnabled) Color(0xFF81C784) else Color(0xFFFF8A80),
@@ -6986,7 +6994,7 @@ private fun FileManagerRowCard(
                             }
                             "saves" -> {
                                 LavenderTagBadge(text = "26.3")
-                                LavenderTagBadge(text = saveDetail?.gameMode ?: "Survival Mode")
+                                LavenderTagBadge(text = saveDetail?.gameMode ?: LauncherText.get(R.string.survival_mode))
                             }
                             "resourcepacks", "shaderpacks" -> {
                                 LavenderTagBadge(text = "26.3")
@@ -6996,7 +7004,7 @@ private fun FileManagerRowCard(
                                         color = Color(0xFF1E3E29)
                                     ) {
                                         Text(
-                                            text = "ACTIVE",
+                                            text = LauncherText.get(R.string.active_2),
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = Color(0xFF81C784),
@@ -7046,7 +7054,7 @@ private fun FileManagerRowCard(
                     Box {
                         Icon(
                             imageVector = Icons.Outlined.Info,
-                            contentDescription = "Info",
+                            contentDescription = LauncherText.get(R.string.info),
                             tint = Color(0xFFD5DEE5),
                             modifier = Modifier
                                 .size(20.dp)
@@ -7066,59 +7074,59 @@ private fun FileManagerRowCard(
                                     verticalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
                                     if (saveDetail != null) {
-                                        Text("Save Info", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                        Text(LauncherText.get(R.string.save_info), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                         Spacer(Modifier.height(2.dp))
-                                        Text("File Name: ${saveDetail.folderName}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("Game Mode: ${saveDetail.gameMode}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("Difficulty: ${saveDetail.difficulty}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("Play Time: ${saveDetail.playTimeFormatted}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.file_name, saveDetail.folderName), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.game_mode, saveDetail.gameMode), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.difficulty, saveDetail.difficulty), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.play_time, saveDetail.playTimeFormatted), fontSize = 12.sp, color = Color(0xFFE0E6EB))
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             Text(
-                                                text = "World Seed: ${saveDetail.worldSeed}",
+                                                text = LauncherText.get(R.string.world_seed, saveDetail.worldSeed),
                                                 fontSize = 12.sp,
                                                 color = Color(0xFFE0E6EB),
                                                 modifier = Modifier.weight(1f, fill = false)
                                             )
                                             Icon(
                                                 imageVector = Icons.Default.ContentCopy,
-                                                contentDescription = "Copy Seed",
+                                                contentDescription = LauncherText.get(R.string.copy_seed),
                                                 tint = SkyBlueAccent,
                                                 modifier = Modifier
                                                     .size(15.dp)
                                                     .clickable {
-                                                        HorizonNativeBridge.copyToClipboard(context, "World Seed", saveDetail.worldSeed)
+                                                        HorizonNativeBridge.copyToClipboard(context, LauncherText.get(R.string.world_seed_2), saveDetail.worldSeed)
                                                     }
                                             )
                                         }
                                     } else if (packDetail != null) {
                                         Text(
-                                            text = if (folder == "shaderpacks") "Shader Pack Information" else "Resource Pack Information",
+                                            text = if (folder == "shaderpacks") LauncherText.get(R.string.shader_pack_information) else LauncherText.get(R.string.resource_pack_information),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
                                         )
                                         Spacer(Modifier.height(2.dp))
-                                        Text("Pack Type: ${packDetail.packType}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("File Name: ${packDetail.fileName}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("File Size: ${packDetail.fileSizeFormatted}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("Format Version: ${packDetail.formatVersion}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.pack_type, packDetail.packType), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.file_name, packDetail.fileName), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.file_size, packDetail.fileSizeFormatted), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.format_version, packDetail.formatVersion), fontSize = 12.sp, color = Color(0xFFE0E6EB))
                                     } else if (modDetail != null) {
-                                        Text("Horizon Mod Manifest (horizon-mod.toml)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                        Text(LauncherText.get(R.string.horizon_mod_manifest_horizon_mod_toml), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                         Spacer(Modifier.height(2.dp))
-                                        Text("Mod ID: ${modDetail.modId}", fontSize = 12.sp, color = SkyBlueAccent)
-                                        Text("Version: ${modDetail.version} (API ${modDetail.apiLine})", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("Author: ${modDetail.author}", fontSize = 12.sp, color = Color(0xFFE0E6EB))
-                                        Text("File: ${modDetail.fileName} (${modDetail.fileSizeFormatted})", fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.mod_id, modDetail.modId), fontSize = 12.sp, color = SkyBlueAccent)
+                                        Text(LauncherText.get(R.string.version_api, modDetail.version, modDetail.apiLine), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.author, modDetail.author), fontSize = 12.sp, color = Color(0xFFE0E6EB))
+                                        Text(LauncherText.get(R.string.file, modDetail.fileName, modDetail.fileSizeFormatted), fontSize = 12.sp, color = Color(0xFFE0E6EB))
                                         Text(
-                                            text = "Capabilities: ${modDetail.capabilities.joinToString(", ").ifEmpty { "registries" }}",
+                                            text = LauncherText.get(R.string.capabilities, modDetail.capabilities.joinToString(", ").ifEmpty { "registries" }),
                                             fontSize = 12.sp,
                                             color = Color(0xFF81C784)
                                         )
                                         Text(
-                                            text = "Status: ${if (isEnabled) "ON (Synced with horizon-mods.txt)" else "OFF (Disabled)"}",
+                                            text = if (isEnabled) LauncherText.get(R.string.mod_status_enabled_synced) else LauncherText.get(R.string.mod_status_disabled),
                                             fontSize = 12.sp,
                                             color = if (isEnabled) Color(0xFF81C784) else Color(0xFFFF8A80)
                                         )
@@ -7131,7 +7139,7 @@ private fun FileManagerRowCard(
                     if (folder == "mods") {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
-                            contentDescription = "Delete Mod",
+                            contentDescription = LauncherText.get(R.string.delete_mod),
                             tint = Color(0xFFFF8A80),
                             modifier = Modifier
                                 .size(20.dp)
@@ -7142,7 +7150,7 @@ private fun FileManagerRowCard(
                     } else {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = LauncherText.get(R.string.delete_2),
                             tint = Color(0xFFFF8A80),
                             modifier = Modifier
                                 .size(19.dp)
@@ -7153,7 +7161,7 @@ private fun FileManagerRowCard(
                         Box {
                             Icon(
                                 imageVector = Icons.Default.MoreHoriz,
-                                contentDescription = "More Options",
+                                contentDescription = LauncherText.get(R.string.more_options),
                                 tint = Color(0xFFD5DEE5),
                                 modifier = Modifier
                                     .size(20.dp)
@@ -7169,7 +7177,7 @@ private fun FileManagerRowCard(
                                     if (folder == "saves") {
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(17.dp)) },
-                                            text = { Text("Quick Play", fontSize = 12.sp, color = Color.White) },
+                                            text = { Text(LauncherText.get(R.string.quick_play), fontSize = 12.sp, color = Color.White) },
                                             onClick = {
                                                 showMoreMenu = false
                                                 onQuickPlayWorld()
@@ -7177,7 +7185,7 @@ private fun FileManagerRowCard(
                                         )
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(17.dp)) },
-                                            text = { Text("Rename", fontSize = 12.sp, color = Color.White) },
+                                            text = { Text(LauncherText.get(R.string.rename_2), fontSize = 12.sp, color = Color.White) },
                                             onClick = {
                                                 showMoreMenu = false
                                                 onRequestRename(file)
@@ -7185,7 +7193,7 @@ private fun FileManagerRowCard(
                                         )
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Default.Save, contentDescription = null, tint = Color.White, modifier = Modifier.size(17.dp)) },
-                                            text = { Text("Backup Save", fontSize = 12.sp, color = Color.White) },
+                                            text = { Text(LauncherText.get(R.string.backup_save), fontSize = 12.sp, color = Color.White) },
                                             onClick = {
                                                 showMoreMenu = false
                                                 HorizonNativeBridge.backupWorldSave(context, file, logEnabled)
@@ -7193,7 +7201,7 @@ private fun FileManagerRowCard(
                                         )
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color(0xFFFF8A80), modifier = Modifier.size(17.dp)) },
-                                            text = { Text("Delete", fontSize = 12.sp, color = Color(0xFFFF8A80)) },
+                                            text = { Text(LauncherText.get(R.string.delete_2), fontSize = 12.sp, color = Color(0xFFFF8A80)) },
                                             onClick = {
                                                 showMoreMenu = false
                                                 onRequestDelete(file, displayTitle)
@@ -7210,7 +7218,7 @@ private fun FileManagerRowCard(
                                                         modifier = Modifier.size(17.dp)
                                                     )
                                                 },
-                                                text = { Text(if (isEnabled) "Disable Pack" else "Enable Pack", fontSize = 12.sp, color = Color.White) },
+                                                text = { Text(if (isEnabled) LauncherText.get(R.string.disable_pack) else LauncherText.get(R.string.enable_pack), fontSize = 12.sp, color = Color.White) },
                                                 onClick = {
                                                     showMoreMenu = false
                                                     scope.launch(Dispatchers.IO) {
@@ -7224,7 +7232,7 @@ private fun FileManagerRowCard(
                                         }
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(17.dp)) },
-                                            text = { Text("Rename", fontSize = 12.sp, color = Color.White) },
+                                            text = { Text(LauncherText.get(R.string.rename_2), fontSize = 12.sp, color = Color.White) },
                                             onClick = {
                                                 showMoreMenu = false
                                                 onRequestRename(file)
@@ -7232,7 +7240,7 @@ private fun FileManagerRowCard(
                                         )
                                         DropdownMenuItem(
                                             leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color(0xFFFF8A80), modifier = Modifier.size(17.dp)) },
-                                            text = { Text("Delete", fontSize = 12.sp, color = Color(0xFFFF8A80)) },
+                                            text = { Text(LauncherText.get(R.string.delete_2), fontSize = 12.sp, color = Color(0xFFFF8A80)) },
                                             onClick = {
                                                 showMoreMenu = false
                                                 onRequestDelete(file, displayTitle)
@@ -7278,7 +7286,7 @@ private fun FileManagerRowCard(
                                 }
                             ) {
                                 Text(
-                                    text = if (isEnabled) "Matikan (Disable)" else "Aktifkan (Enable)",
+                                    text = if (isEnabled) LauncherText.get(R.string.disable) else LauncherText.get(R.string.enable),
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isEnabled) Color(0xFF81C784) else SkyBlueDarkText,
@@ -7292,7 +7300,7 @@ private fun FileManagerRowCard(
                             modifier = Modifier.clickable { onRequestDelete(file, displayTitle) }
                         ) {
                             Text(
-                                text = "Hapus",
+                                text = LauncherText.get(R.string.delete_2),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFF8A80),
@@ -7358,8 +7366,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Graphics API (Horizon Android 0.7.6)",
-                            description = "Set the native Vulkan / OpenGL ES renderer used by Minecraft 26.3",
+                            title = LauncherText.get(R.string.graphics_api_horizon_android_0_7_6),
+                            description = LauncherText.get(R.string.set_the_native_vulkan_opengl_es_renderer),
                             selectedItem = config.renderer,
                             options = HorizonRendererMode.entries,
                             itemLabel = { it.label },
@@ -7367,8 +7375,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Screen Presentation Aspect Ratio (v0.7.5)",
-                            description = "Configure display fitting ratio for both logical rendering and touch input bounds",
+                            title = LauncherText.get(R.string.screen_presentation_aspect_ratio_v0_7_5),
+                            description = LauncherText.get(R.string.configure_display_fitting_ratio_for_both_logical),
                             selectedItem = config.screenAspect,
                             options = HorizonScreenAspect.entries,
                             itemLabel = { it.label },
@@ -7376,8 +7384,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Orientation Rule",
-                            description = "Choose how screen orientation is locked or sensor-rotated",
+                            title = LauncherText.get(R.string.orientation_rule),
+                            description = LauncherText.get(R.string.choose_how_screen_orientation_is_locked_or),
                             selectedItem = config.orientation,
                             options = HorizonOrientation.entries,
                             itemLabel = { it.label },
@@ -7385,8 +7393,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Resolution Scale",
-                            description = "Lower values boost FPS on mobile GPUs; higher values sharpen 3D terrain & HUD",
+                            title = LauncherText.get(R.string.resolution_scale),
+                            description = LauncherText.get(R.string.lower_values_boost_fps_on_mobile_gpus),
                             value = config.renderScalePercent,
                             valueRange = 25..100,
                             step = 5,
@@ -7395,38 +7403,38 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Preferred Display Refresh Rate (Android 11+)",
-                            description = "Request high-refresh display mode from SurfaceFlinger (display_hz in v0.7.5)",
+                            title = LauncherText.get(R.string.preferred_display_refresh_rate_android_11),
+                            description = LauncherText.get(R.string.request_high_refresh_display_mode_from_surfaceflinger),
                             selectedItem = config.displayRefreshHz,
                             options = listOf(0, 60, 90, 120, 144),
-                            itemLabel = { if (it == 0) "Auto (System Default)" else "$it Hz" },
+                            itemLabel = { if (it == 0) LauncherText.get(R.string.auto_system_default) else LauncherText.get(R.string.hz, it) },
                             onSelect = { onConfigChange(config.copy(displayRefreshHz = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Avoid Camera Cutout / Notch (v0.7.5)",
-                            description = "Inset viewport safely away from punch-hole cameras and display cutouts",
+                            title = LauncherText.get(R.string.avoid_camera_cutout_notch_v0_7_5),
+                            description = LauncherText.get(R.string.inset_viewport_safely_away_from_punch_hole),
                             checked = config.screenAvoidCutout,
                             onCheckedChange = { onConfigChange(config.copy(screenAvoidCutout = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Immersive Fullscreen Navigation (v0.7.5)",
-                            description = "Hide Android system status and navigation bars while playing",
+                            title = LauncherText.get(R.string.immersive_fullscreen_navigation_v0_7_5),
+                            description = LauncherText.get(R.string.hide_android_system_status_and_navigation_bars),
                             checked = config.screenImmersive,
                             onCheckedChange = { onConfigChange(config.copy(screenImmersive = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "VSync (Vertical Synchronization)",
-                            description = "Synchronize frame rate with display refresh rate in options.txt",
+                            title = LauncherText.get(R.string.vsync_vertical_synchronization),
+                            description = LauncherText.get(R.string.synchronize_frame_rate_with_display_refresh_rate),
                             checked = config.mcVsync,
                             onCheckedChange = { onConfigChange(config.copy(mcVsync = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Android ADPF Performance Hints (v0.7.5)",
-                            description = "Send Android Dynamic Performance Framework CPU/GPU thermal scheduling hints",
+                            title = LauncherText.get(R.string.android_adpf_performance_hints_v0_7_5),
+                            description = LauncherText.get(R.string.send_android_dynamic_performance_framework_cpu_gpu),
                             checked = config.performanceHintsAdpf,
                             onCheckedChange = { onConfigChange(config.copy(performanceHintsAdpf = it)) }
                         )
@@ -7442,78 +7450,78 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Game Profile Slot",
-                            description = "Select which isolated profile directory (saves, mods, options.txt) is active",
+                            title = LauncherText.get(R.string.game_profile_slot),
+                            description = LauncherText.get(R.string.select_which_isolated_profile_directory_saves_mods),
                             selectedItem = config.profile,
                             options = listOf(0, 1, 2, 3),
-                            itemLabel = { if (it == 0) "Default (Profile 0)" else "Profile $it" },
+                            itemLabel = { if (it == 0) LauncherText.get(R.string.default_profile_0) else LauncherText.get(R.string.profile, it) },
                             onSelect = { onConfigChange(config.copy(profile = it)) }
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Render Distance",
-                            description = "Number of visible world chunks rendered around the player (synced with options.txt)",
+                            title = LauncherText.get(R.string.render_distance),
+                            description = LauncherText.get(R.string.number_of_visible_world_chunks_rendered_around),
                             value = config.mcRenderDistance,
                             valueRange = 2..32,
                             step = 1,
-                            valueSuffix = " Chunks",
+                            valueSuffix = LauncherText.get(R.string.chunks),
                             onValueChange = { onConfigChange(config.copy(mcRenderDistance = it)) }
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Simulation Distance",
-                            description = "Number of active entity and block-tick chunks around the player (synced with options.txt)",
+                            title = LauncherText.get(R.string.simulation_distance),
+                            description = LauncherText.get(R.string.number_of_active_entity_and_block_tick),
                             value = config.mcSimulationDistance,
                             valueRange = 5..32,
                             step = 1,
-                            valueSuffix = " Chunks",
+                            valueSuffix = LauncherText.get(R.string.chunks),
                             onValueChange = { onConfigChange(config.copy(mcSimulationDistance = it)) }
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Max Framerate Limit",
-                            description = "Maximum FPS cap inside Minecraft (260 = Unlimited, synced with options.txt)",
+                            title = LauncherText.get(R.string.max_framerate_limit),
+                            description = LauncherText.get(R.string.maximum_fps_cap_inside_minecraft_260_unlimited),
                             value = config.mcMaxFps,
                             valueRange = 30..260,
                             step = 10,
-                            valueSuffix = " FPS",
+                            valueSuffix = LauncherText.get(R.string.fps),
                             onValueChange = { onConfigChange(config.copy(mcMaxFps = it)) }
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "GUI Scale",
-                            description = "In-game HUD and inventory interface scale factor (synced with options.txt)",
+                            title = LauncherText.get(R.string.gui_scale),
+                            description = LauncherText.get(R.string.in_game_hud_and_inventory_interface_scale),
                             selectedItem = config.mcGuiScale,
                             options = listOf(0, 1, 2, 3, 4),
-                            itemLabel = { if (it == 0) "Auto" else "${it}x" },
+                            itemLabel = { if (it == 0) LauncherText.get(R.string.auto) else "${it}x" },
                             onSelect = { onConfigChange(config.copy(mcGuiScale = it)) }
                         )
 
                         // Built-in Horizon 26.3 Client Extras (`horizon-extras.txt`)
                         ZalithSettingToggleCard(
-                            title = "Fullbright Cave Lighting (Horizon Extra)",
-                            description = "Display blocks and entities with a fully bright lightmap in dark caves (horizon-extras.txt)",
+                            title = LauncherText.get(R.string.fullbright_cave_lighting_horizon_extra),
+                            description = LauncherText.get(R.string.display_blocks_and_entities_with_a_fully),
                             checked = config.extraFullbright,
                             onCheckedChange = { onConfigChange(config.copy(extraFullbright = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Dynamic Handheld Lights (Horizon Extra)",
-                            description = "Held torches, lanterns, and glowing items illuminate nearby blocks in real time",
+                            title = LauncherText.get(R.string.dynamic_handheld_lights_horizon_extra),
+                            description = LauncherText.get(R.string.held_torches_lanterns_and_glowing_items_illuminate),
                             checked = config.extraDynamicLights,
                             onCheckedChange = { onConfigChange(config.copy(extraDynamicLights = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Auto-Reconnect on Server Drop (Horizon Extra)",
-                            description = "Automatically retry server connection with 5s–60s backoff if disconnected",
+                            title = LauncherText.get(R.string.auto_reconnect_on_server_drop_horizon_extra),
+                            description = LauncherText.get(R.string.automatically_retry_server_connection_with_5s_60s),
                             checked = config.extraAutoReconnect,
                             onCheckedChange = { onConfigChange(config.copy(extraAutoReconnect = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Mouse Tweaks & Inventory Sort Button (Horizon Extra)",
-                            description = "Enable fast slot dragging and one-click chest/inventory sorting in horizon-extras.txt",
+                            title = LauncherText.get(R.string.mouse_tweaks_inventory_sort_button_horizon_extra),
+                            description = LauncherText.get(R.string.enable_fast_slot_dragging_and_one_click),
                             checked = config.extraMouseTweaks,
                             onCheckedChange = {
                                 onConfigChange(config.copy(extraMouseTweaks = it, extraInventorySort = it))
@@ -7562,7 +7570,7 @@ private fun CleanSettingsViewport(
                                             tint = if (testResultSuccess) Color(0xFF81C784) else Color(0xFFFF8A80)
                                         )
                                         Text(
-                                            text = if (testResultSuccess) "Google AI Studio Terhubung!" else "Koneksi Gemini API Gagal",
+                                            text = if (testResultSuccess) LauncherText.get(R.string.google_ai_studio_connected) else LauncherText.get(R.string.gemini_api_connection_failed),
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
@@ -7582,22 +7590,22 @@ private fun CleanSettingsViewport(
                                         onClick = { testResultDialogText = null },
                                         colors = ButtonDefaults.buttonColors(containerColor = SkyBlueAccent)
                                     ) {
-                                        Text("OK", color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
+                                        Text(LauncherText.get(R.string.ok), color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             )
                         }
 
                         ZalithSettingToggleCard(
-                            title = "Enable Minecraft In-Game AI Agent (Gemini AI Studio)",
-                            description = "Aktifkan AI Agent di dalam Minecraft 26.3 yang terhubung ke Google AI Studio (Gemini API) & socket kontrol game (horizon-control.json)",
+                            title = LauncherText.get(R.string.enable_minecraft_in_game_ai_agent_gemini),
+                            description = LauncherText.get(R.string.enable_the_ai_agent_inside_minecraft_26),
                             checked = config.aiAgentEnabled,
                             onCheckedChange = { onConfigChange(config.copy(aiAgentEnabled = it)) }
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "AI Agent Engine Provider",
-                            description = "Pilih integrasi Google AI Studio (Gemini API dengan Local API Key) atau Local Socket saja",
+                            title = LauncherText.get(R.string.ai_agent_engine_provider),
+                            description = LauncherText.get(R.string.choose_google_ai_studio_integration_gemini_api),
                             selectedItem = config.aiAgentProvider,
                             options = HorizonAiAgentProvider.entries,
                             itemLabel = { it.label },
@@ -7621,19 +7629,19 @@ private fun CleanSettingsViewport(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "Google AI Studio API Key (Disimpan Lokal)",
+                                            text = LauncherText.get(R.string.google_ai_studio_api_key_stored_locally),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = Color.White
                                         )
                                         Text(
-                                            text = "API Key disimpan khusus di penyimpanan privat perangkat (0600) dan tidak pernah dikirim ke log atau server lain.",
+                                            text = LauncherText.get(R.string.the_api_key_is_stored_only_in),
                                             fontSize = 12.sp,
                                             color = MutedSubtitleText
                                         )
                                     }
                                     LavenderTagBadge(
-                                        text = if (localApiKey.isNotBlank()) "Key Tersimpan Lokal" else "Belum Diisi"
+                                        text = if (localApiKey.isNotBlank()) LauncherText.get(R.string.key_stored_locally) else LauncherText.get(R.string.not_set)
                                     )
                                 }
 
@@ -7643,7 +7651,7 @@ private fun CleanSettingsViewport(
                                         localApiKey = newKey
                                         HorizonNativeBridge.saveGeminiApiKeyLocal(context, newKey)
                                     },
-                                    label = { Text("Paste Google AI Studio API Key (AIzaSy...)", fontSize = 11.sp) },
+                                    label = { Text(LauncherText.get(R.string.paste_google_ai_studio_api_key_aizasy), fontSize = 11.sp) },
                                     singleLine = true,
                                     visualTransformation = if (showApiKeyText) {
                                         androidx.compose.ui.text.input.VisualTransformation.None
@@ -7654,7 +7662,7 @@ private fun CleanSettingsViewport(
                                         IconButton(onClick = { showApiKeyText = !showApiKeyText }) {
                                             Icon(
                                                 imageVector = if (showApiKeyText) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                                contentDescription = "Show/Hide API Key",
+                                                contentDescription = LauncherText.get(R.string.show_hide_api_key),
                                                 tint = SkyBlueAccent
                                             )
                                         }
@@ -7671,7 +7679,7 @@ private fun CleanSettingsViewport(
                                             HorizonNativeBridge.saveGeminiApiKeyLocal(context, localApiKey)
                                             Toast.makeText(
                                                 context,
-                                                "API Key Gemini berhasil disimpan secara lokal di perangkat!",
+                                                LauncherText.get(R.string.gemini_api_key_saved_locally_on_the),
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                             scope.launch {
@@ -7688,7 +7696,7 @@ private fun CleanSettingsViewport(
                                     ) {
                                         Icon(Icons.Default.Save, contentDescription = null, tint = SkyBlueDarkText, modifier = Modifier.size(16.dp))
                                         Spacer(Modifier.width(6.dp))
-                                        Text("Simpan Key & Muat Model", fontSize = 12.sp, color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
+                                        Text(LauncherText.get(R.string.save_key_load_models), fontSize = 12.sp, color = SkyBlueDarkText, fontWeight = FontWeight.Bold)
                                     }
 
                                     OutlinedButton(
@@ -7714,7 +7722,7 @@ private fun CleanSettingsViewport(
                                         Icon(Icons.Default.Bolt, contentDescription = null, tint = SkyBlueAccent, modifier = Modifier.size(16.dp))
                                         Spacer(Modifier.width(6.dp))
                                         Text(
-                                            text = if (isTestingApi) "Menguji Gemini..." else "Test Koneksi Gemini",
+                                            text = if (isTestingApi) LauncherText.get(R.string.testing_gemini) else LauncherText.get(R.string.test_gemini_connection),
                                             fontSize = 12.sp,
                                             color = SkyBlueAccent,
                                             fontWeight = FontWeight.SemiBold
@@ -7726,10 +7734,10 @@ private fun CleanSettingsViewport(
                                             onClick = {
                                                 localApiKey = ""
                                                 HorizonNativeBridge.clearGeminiApiKeyLocal(context)
-                                                Toast.makeText(context, "API Key lokal dihapus.", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, LauncherText.get(R.string.local_api_key_deleted), Toast.LENGTH_SHORT).show()
                                             }
                                         ) {
-                                            Icon(Icons.Default.DeleteOutline, contentDescription = "Clear Key", tint = Color(0xFFFF8A80), modifier = Modifier.size(16.dp))
+                                            Icon(Icons.Default.DeleteOutline, contentDescription = LauncherText.get(R.string.clear_key), tint = Color(0xFFFF8A80), modifier = Modifier.size(16.dp))
                                         }
                                     }
                                 }
@@ -7763,7 +7771,7 @@ private fun CleanSettingsViewport(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = "Pilih Model Google AI Studio (${availableModels.size})",
+                                                text = LauncherText.get(R.string.choose_google_ai_studio_model, availableModels.size),
                                                 fontSize = 15.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White
@@ -7773,7 +7781,7 @@ private fun CleanSettingsViewport(
                                         OutlinedTextField(
                                             value = modelSearchQuery,
                                             onValueChange = { modelSearchQuery = it },
-                                            placeholder = { Text("Cari model (misal: Argon, 4.0, 3.8, 3.5, 2.5, Lite)...", fontSize = 11.sp) },
+                                            placeholder = { Text(LauncherText.get(R.string.search_models_e_g_argon_4_0), fontSize = 11.sp) },
                                             singleLine = true,
                                             modifier = Modifier.fillMaxWidth()
                                         )
@@ -7827,7 +7835,7 @@ private fun CleanSettingsViewport(
                                                             )
                                                         }
                                                         Text(
-                                                            text = "ID: ${option.modelId}",
+                                                            text = LauncherText.get(R.string.id, option.modelId),
                                                             fontSize = 11.sp,
                                                             fontWeight = FontWeight.Medium,
                                                             color = SkyBlueAccent.copy(alpha = 0.88f)
@@ -7856,7 +7864,7 @@ private fun CleanSettingsViewport(
                                 },
                                 confirmButton = {
                                     TextButton(onClick = { showModelPickerDialog = false }) {
-                                        Text("Tutup", color = SkyBlueAccent, fontWeight = FontWeight.Bold)
+                                        Text(LauncherText.get(R.string.close), color = SkyBlueAccent, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             )
@@ -7885,7 +7893,7 @@ private fun CleanSettingsViewport(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Text(
-                                            text = if (isRefreshingModels) "Model Google AI Studio (Memuat...)" else "Pilih Model Google AI Studio",
+                                            text = if (isRefreshingModels) LauncherText.get(R.string.google_ai_studio_models_loading) else LauncherText.get(R.string.choose_google_ai_studio_model_2),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = Color.White
@@ -7893,7 +7901,7 @@ private fun CleanSettingsViewport(
                                         LavenderTagBadge(text = selectedModelObj.badge)
                                     }
                                     Text(
-                                        text = "Aktif: ${selectedModelObj.displayName}  •  ID: ${selectedModelObj.modelId}",
+                                        text = LauncherText.get(R.string.active_id, selectedModelObj.displayName, selectedModelObj.modelId),
                                         fontSize = 12.5.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SkyBlueAccent
@@ -7907,7 +7915,7 @@ private fun CleanSettingsViewport(
                                 Spacer(Modifier.width(10.dp))
                                 Icon(
                                     imageVector = Icons.Default.UnfoldMore,
-                                    contentDescription = "Select Model",
+                                    contentDescription = LauncherText.get(R.string.select_model),
                                     tint = SkyBlueAccent,
                                     modifier = Modifier.size(22.dp)
                                 )
@@ -7924,20 +7932,20 @@ private fun CleanSettingsViewport(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "Custom / Manual Gemini Model ID",
+                                    text = LauncherText.get(R.string.custom_manual_gemini_model_id),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "Pilih dari 22+ model di atas (Gemini 4 Argon, Gemini 3.8, Gemini 3.5 Flash-Lite, Gemini 2.5 Pro/Flash, dll.) atau ketik ID model secara manual:",
+                                    text = LauncherText.get(R.string.choose_from_the_22_models_above_gemini),
                                     fontSize = 11.sp,
                                     color = MutedSubtitleText
                                 )
                                 OutlinedTextField(
                                     value = config.geminiModel,
                                     onValueChange = { onConfigChange(config.copy(geminiModel = it.trim())) },
-                                    label = { Text("Active Gemini Model ID (contoh: gemini-4-argon, gemini-3.8-pro, gemini-3.5-flash-lite)", fontSize = 11.sp) },
+                                    label = { Text(LauncherText.get(R.string.active_gemini_model_id_e_g_gemini), fontSize = 11.sp) },
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -7945,15 +7953,15 @@ private fun CleanSettingsViewport(
                         }
 
                         ZalithSettingToggleCard(
-                            title = "In-Game Chat Assistant (@ai / !ai Trigger)",
-                            description = "Izinkan mengetik @ai atau !ai di chat Minecraft untuk bertanya atau memberi perintah langsung ke Gemini AI Agent",
+                            title = LauncherText.get(R.string.in_game_chat_assistant_ai_ai_trigger),
+                            description = LauncherText.get(R.string.allow_typing_ai_or_ai_in_minecraft),
                             checked = config.aiAgentAutoAssistChat,
                             onCheckedChange = { onConfigChange(config.copy(aiAgentAutoAssistChat = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Autonomous Game Control Actions (Move, Look, Mine, Place, Craft)",
-                            description = "Izinkan Gemini AI Agent mengendalikan aksi karakter melalui protokol lokal horizon-control.json saat diminta",
+                            title = LauncherText.get(R.string.autonomous_game_control_actions_move_look_mine),
+                            description = LauncherText.get(R.string.allow_the_gemini_ai_agent_to_control),
                             checked = config.aiAgentAutonomousActions,
                             onCheckedChange = { onConfigChange(config.copy(aiAgentAutonomousActions = it)) }
                         )
@@ -7968,20 +7976,20 @@ private fun CleanSettingsViewport(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "Instruksi & Peran Default AI Agent di Minecraft",
+                                    text = LauncherText.get(R.string.default_ai_agent_instructions_role_in_minecraft),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "Instruksi sistem yang dikirim ke model ${config.geminiModel} saat AI Agent aktif di dalam dunia Minecraft 26.3:",
+                                    text = LauncherText.get(R.string.system_instructions_sent_to_the_model_while, config.geminiModel),
                                     fontSize = 12.sp,
                                     color = MutedSubtitleText
                                 )
                                 OutlinedTextField(
                                     value = config.aiAgentTaskPrompt,
                                     onValueChange = { onConfigChange(config.copy(aiAgentTaskPrompt = it)) },
-                                    label = { Text("System Prompt / Tugas AI Agent", fontSize = 11.sp) },
+                                    label = { Text(LauncherText.get(R.string.system_prompt_ai_agent_task), fontSize = 11.sp) },
                                     maxLines = 3,
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -7991,8 +7999,8 @@ private fun CleanSettingsViewport(
 
                     SettingsSubCategory.CONTROLS -> {
                         ZalithSettingDropdownCard(
-                            title = "Input Mode (v0.7.5)",
-                            description = "Select primary input host (Auto follows active touch, mouse, or controller input)",
+                            title = LauncherText.get(R.string.input_mode_v0_7_5),
+                            description = LauncherText.get(R.string.select_primary_input_host_auto_follows_active),
                             selectedItem = config.inputHost,
                             options = HorizonInputHost.entries,
                             itemLabel = { it.label },
@@ -8000,8 +8008,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Touch Control Scheme (v2.3)",
-                            description = "Combine Joystick or D-Pad movement with Crosshair or Tap-to-Interact aiming",
+                            title = LauncherText.get(R.string.touch_control_scheme_v2_3),
+                            description = LauncherText.get(R.string.combine_joystick_or_d_pad_movement_with),
                             selectedItem = config.touchScheme,
                             options = HorizonTouchScheme.entries,
                             itemLabel = { it.label },
@@ -8009,8 +8017,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Horizontal Touch Sensitivity (X)",
-                            description = "Independent horizontal camera look sensitivity for touch input",
+                            title = LauncherText.get(R.string.horizontal_touch_sensitivity_x),
+                            description = LauncherText.get(R.string.independent_horizontal_camera_look_sensitivity_for_touch),
                             value = config.touchSensitivityXPercent,
                             valueRange = 20..250,
                             step = 5,
@@ -8019,8 +8027,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Vertical Touch Sensitivity (Y)",
-                            description = "Independent vertical camera look sensitivity for touch input",
+                            title = LauncherText.get(R.string.vertical_touch_sensitivity_y),
+                            description = LauncherText.get(R.string.independent_vertical_camera_look_sensitivity_for_touch),
                             value = config.touchSensitivityYPercent,
                             valueRange = 20..250,
                             step = 5,
@@ -8029,58 +8037,58 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingToggleCard(
-                            title = "360-Degree Joystick Movement (v2.3)",
-                            description = "Allow continuous 360-degree analog movement vector when using Touch Joystick schemes",
+                            title = LauncherText.get(R.string.text_360_degree_joystick_movement_v2_3),
+                            description = LauncherText.get(R.string.allow_continuous_360_degree_analog_movement_vector),
                             checked = config.touch360Joystick,
                             onCheckedChange = { onConfigChange(config.copy(touch360Joystick = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Swap Hands Touch Button (v2.3)",
-                            description = "Show dedicated off-hand swap action button on the touch HUD",
+                            title = LauncherText.get(R.string.swap_hands_touch_button_v2_3),
+                            description = LauncherText.get(R.string.show_dedicated_off_hand_swap_action_button),
                             checked = config.touchSwapHandsButton,
                             onCheckedChange = { onConfigChange(config.copy(touchSwapHandsButton = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Virtual Menu Mouse in Inventories (v2.3)",
-                            description = "Enable precision virtual cursor mode inside inventory, chest, and crafting screens",
+                            title = LauncherText.get(R.string.virtual_menu_mouse_in_inventories_v2_3),
+                            description = LauncherText.get(R.string.enable_precision_virtual_cursor_mode_inside_inventory),
                             checked = config.inventoryVirtualMouse,
                             onCheckedChange = { onConfigChange(config.copy(inventoryVirtualMouse = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "On-Screen Touch Keypad",
-                            description = "Enable customizable virtual touch buttons inside Minecraft (horizon-keypad.json)",
+                            title = LauncherText.get(R.string.on_screen_touch_keypad),
+                            description = LauncherText.get(R.string.enable_customizable_virtual_touch_buttons_inside_minecraft),
                             checked = config.keypadControls,
                             onCheckedChange = { onConfigChange(config.copy(keypadControls = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Sprint Toggle / Tap-to-Sprint (v0.7.4+)",
-                            description = "Use tap-to-toggle mode for the touch Sprint button instead of holding",
+                            title = LauncherText.get(R.string.sprint_toggle_tap_to_sprint_v0_7),
+                            description = LauncherText.get(R.string.use_tap_to_toggle_mode_for_the),
                             checked = config.sprintToggle,
                             onCheckedChange = { onConfigChange(config.copy(sprintToggle = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Inventory Touch Action Buttons (v0.7.4+)",
-                            description = "Keep Attack (left-click), Interact (right-click), and Sneak (Shift) touch buttons visible inside inventories",
+                            title = LauncherText.get(R.string.inventory_touch_action_buttons_v0_7_4),
+                            description = LauncherText.get(R.string.keep_attack_left_click_interact_right_click),
                             checked = config.inventoryTouchControls,
                             onCheckedChange = { onConfigChange(config.copy(inventoryTouchControls = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Gyroscope Camera Aiming (v0.7.4+)",
-                            description = "Enable motion-sensor gyroscope camera aiming with adaptive axes",
+                            title = LauncherText.get(R.string.gyroscope_camera_aiming_v0_7_4),
+                            description = LauncherText.get(R.string.enable_motion_sensor_gyroscope_camera_aiming_with),
                             checked = config.gyroAimingEnabled,
                             onCheckedChange = { onConfigChange(config.copy(gyroAimingEnabled = it)) }
                         )
 
                         if (config.gyroAimingEnabled) {
                             ZalithSettingSliderCard(
-                                title = "Gyroscope Aim Sensitivity",
-                                description = "Adjust motion sensor aiming speed multiplier",
+                                title = LauncherText.get(R.string.gyroscope_aim_sensitivity),
+                                description = LauncherText.get(R.string.adjust_motion_sensor_aiming_speed_multiplier),
                                 value = config.gyroSensitivityPercent,
                                 valueRange = 10..200,
                                 step = 10,
@@ -8104,8 +8112,8 @@ private fun CleanSettingsViewport(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Text("Reset Touch Keypad Layout", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                                    Text("Restore on-screen touch button positions in horizon-keypad.json back to default", fontSize = 12.sp, color = MutedSubtitleText)
+                                    Text(LauncherText.get(R.string.reset_touch_keypad_layout), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                    Text(LauncherText.get(R.string.restore_on_screen_touch_button_positions_in), fontSize = 12.sp, color = MutedSubtitleText)
                                 }
                                 Icon(Icons.Default.Refresh, contentDescription = null, tint = SkyBlueAccent)
                             }
@@ -8114,8 +8122,8 @@ private fun CleanSettingsViewport(
 
                     SettingsSubCategory.GAMEPAD -> {
                         ZalithSettingDropdownCard(
-                            title = "Controller & Gamepad Routing (v0.7.5)",
-                            description = "Configure USB & Bluetooth gamepad input host (Xbox, DualSense, Switch Pro)",
+                            title = LauncherText.get(R.string.controller_gamepad_routing_v0_7_5),
+                            description = LauncherText.get(R.string.configure_usb_bluetooth_gamepad_input_host_xbox),
                             selectedItem = config.inputHost,
                             options = listOf(HorizonInputHost.AUTO, HorizonInputHost.CONTROLLER, HorizonInputHost.KEYBOARD_MOUSE, HorizonInputHost.TOUCH),
                             itemLabel = { it.label },
@@ -8123,8 +8131,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingDropdownCard(
-                            title = "Controller Menu & Inventory Navigation (v0.7.5)",
-                            description = "Choose Focus highlight (D-pad/Stick step) or Virtual Pointer cursor in menus (horizon-controller.txt)",
+                            title = LauncherText.get(R.string.controller_menu_inventory_navigation_v0_7_5),
+                            description = LauncherText.get(R.string.choose_focus_highlight_d_pad_stick_step),
                             selectedItem = config.controllerNavMode,
                             options = HorizonControllerNavMode.entries,
                             itemLabel = { it.label },
@@ -8132,15 +8140,15 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Controller Vibration & Rumble (v0.7.4+)",
-                            description = "Enable controller haptics and rumble feedback when supported by Android driver",
+                            title = LauncherText.get(R.string.controller_vibration_rumble_v0_7_4),
+                            description = LauncherText.get(R.string.enable_controller_haptics_and_rumble_feedback_when),
                             checked = config.controllerVibration,
                             onCheckedChange = { onConfigChange(config.copy(controllerVibration = it)) }
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Controller Look Sensitivity",
-                            description = "Right-stick camera yaw/pitch rotation speed (synced with horizon-controller.txt)",
+                            title = LauncherText.get(R.string.controller_look_sensitivity),
+                            description = LauncherText.get(R.string.right_stick_camera_yaw_pitch_rotation_speed),
                             value = config.controllerSensitivityPercent,
                             valueRange = 20..200,
                             step = 10,
@@ -8149,8 +8157,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingSliderCard(
-                            title = "Analog Stick Radial Deadzone",
-                            description = "Prevent stick drift on left and right thumbsticks (synced with horizon-controller.txt)",
+                            title = LauncherText.get(R.string.analog_stick_radial_deadzone),
+                            description = LauncherText.get(R.string.prevent_stick_drift_on_left_and_right),
                             value = config.controllerDeadzonePercent,
                             valueRange = 5..40,
                             step = 5,
@@ -8159,17 +8167,32 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Audio Safe Mode",
-                            description = "Disable OpenAL event callbacks if Bluetooth controllers or headsets cause audio stutter",
+                            title = LauncherText.get(R.string.audio_safe_mode),
+                            description = LauncherText.get(R.string.disable_openal_event_callbacks_if_bluetooth_controllers),
                             checked = config.disableAudioSafeMode,
                             onCheckedChange = { onConfigChange(config.copy(disableAudioSafeMode = it)) }
                         )
                     }
 
                     SettingsSubCategory.LAUNCHER -> {
+                        val languageContext = LocalContext.current
                         ZalithSettingDropdownCard(
-                            title = "Dashboard Background Mode (Wallpaper vs. Video Trailer)",
-                            description = "Choose between static 16:9 HD Minecraft wallpapers or auto-playing official Minecraft YouTube Trailers (720p)",
+                            title = LauncherText.get(R.string.language_setting_title),
+                            description = LauncherText.get(R.string.language_setting_description),
+                            selectedItem = LauncherLocale.readLanguage(languageContext),
+                            options = LauncherLanguage.entries,
+                            itemLabel = { LauncherText.get(it.labelResource) },
+                            onSelect = { chosenLanguage ->
+                                if (chosenLanguage != LauncherLocale.readLanguage(languageContext)) {
+                                    Toast.makeText(languageContext, LauncherText.get(R.string.language_restarting), Toast.LENGTH_SHORT).show()
+                                    LauncherLocale.applyAndRestart(languageContext, chosenLanguage)
+                                }
+                            }
+                        )
+
+                        ZalithSettingDropdownCard(
+                            title = LauncherText.get(R.string.dashboard_background_mode_wallpaper_vs_video_trailer),
+                            description = LauncherText.get(R.string.choose_between_static_16_9_hd_minecraft),
                             selectedItem = config.backgroundMode,
                             options = HorizonBackgroundMode.entries,
                             itemLabel = { it.label },
@@ -8184,8 +8207,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Auto-Play Minecraft YouTube 'Trailer' Video",
-                            description = "Automatically play the latest official @Minecraft YouTube videos containing 'Trailer' on the dashboard and turn off static wallpaper while playing",
+                            title = LauncherText.get(R.string.auto_play_minecraft_youtube_trailer_video),
+                            description = LauncherText.get(R.string.automatically_play_the_latest_official_minecraft_youtube),
                             checked = config.useYoutubeTrailerWallpaper || config.backgroundMode == HorizonBackgroundMode.YOUTUBE_TRAILER,
                             onCheckedChange = { enabled ->
                                 onConfigChange(
@@ -8198,8 +8221,8 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Silent / Mute Trailer Video Audio",
-                            description = "Mute audio while playing the 720p Minecraft Trailer video on the dashboard (disable to hear full trailer audio)",
+                            title = LauncherText.get(R.string.silent_mute_trailer_video_audio),
+                            description = LauncherText.get(R.string.mute_audio_while_playing_the_720p_minecraft),
                             checked = config.muteTrailerVideo,
                             onCheckedChange = { muted ->
                                 onConfigChange(config.copy(muteTrailerVideo = muted))
@@ -8222,13 +8245,13 @@ private fun CleanSettingsViewport(
                             ) {
                                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                     Text(
-                                        text = "Check for Launcher Updates (HorizonZ v${HorizonNativeBridge.INSTALLED_LAUNCHER_VERSION})",
+                                        text = LauncherText.get(R.string.check_for_launcher_updates_horizonz_v, HorizonNativeBridge.INSTALLED_LAUNCHER_VERSION),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = Color.White
                                     )
                                     Text(
-                                        text = "Connected to official fork: github.com/${HorizonNativeBridge.GITHUB_FORK_REPO_SLUG}/releases",
+                                        text = LauncherText.get(R.string.connected_to_official_fork_github_com_releases, HorizonNativeBridge.GITHUB_FORK_REPO_SLUG),
                                         fontSize = 12.sp,
                                         color = SkyBlueAccent
                                     )
@@ -8238,8 +8261,8 @@ private fun CleanSettingsViewport(
                         }
 
                         ZalithSettingDropdownCard(
-                            title = "Theme Palette (Default: Monet / Material You)",
-                            description = "Pilih palet warna tampilan Launcher (Default: Monet / Material You)",
+                            title = LauncherText.get(R.string.theme_palette_default_monet_material_you),
+                            description = LauncherText.get(R.string.choose_the_launcher_color_palette_default_monet),
                             selectedItem = config.themePalette,
                             options = ZalithThemePalette.entries,
                             itemLabel = { it.label },
@@ -8254,29 +8277,29 @@ private fun CleanSettingsViewport(
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Material You Dynamic Color (Android 12+)",
-                            description = "Adapt launcher accent colors to your system wallpaper automatically",
+                            title = LauncherText.get(R.string.material_you_dynamic_color_android_12),
+                            description = LauncherText.get(R.string.adapt_launcher_accent_colors_to_your_system),
                             checked = config.useDynamicColor,
                             onCheckedChange = { onConfigChange(config.copy(useDynamicColor = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "System & Game Runtime Logs",
-                            description = "Record launcher, installer, and Minecraft runtime logs for troubleshooting",
+                            title = LauncherText.get(R.string.system_game_runtime_logs),
+                            description = LauncherText.get(R.string.record_launcher_installer_and_minecraft_runtime_logs),
                             checked = config.enableSystemLog,
                             onCheckedChange = { onConfigChange(config.copy(enableSystemLog = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Record Performance Telemetry",
-                            description = "Write frame-time and GPU benchmark metrics to performance.json during gameplay",
+                            title = LauncherText.get(R.string.record_performance_telemetry),
+                            description = LauncherText.get(R.string.write_frame_time_and_gpu_benchmark_metrics),
                             checked = config.recordPerformance,
                             onCheckedChange = { onConfigChange(config.copy(recordPerformance = it)) }
                         )
 
                         ZalithSettingToggleCard(
-                            title = "Detailed GPU Stage Profiling (p50/p95/p99)",
-                            description = "Include rolling GPU preparation, upload, rendering, and post-processing timings",
+                            title = LauncherText.get(R.string.detailed_gpu_stage_profiling_p50_p95_p99),
+                            description = LauncherText.get(R.string.include_rolling_gpu_preparation_upload_rendering_and),
                             checked = config.gpuStageProfiling,
                             onCheckedChange = { onConfigChange(config.copy(gpuStageProfiling = it)) }
                         )
@@ -8290,19 +8313,19 @@ private fun CleanSettingsViewport(
                                 modifier = Modifier.padding(18.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text("Quick Server (DNS/SRV v0.7.5), Proxy & Diagnostics", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                Text(LauncherText.get(R.string.quick_server_dns_srv_v0_7_5), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                                     OutlinedTextField(
                                         value = config.defaultServer,
                                         onValueChange = { onConfigChange(config.copy(defaultServer = it)) },
-                                        label = { Text("Quick-Join Server (domain / ip:port)", fontSize = 11.sp) },
+                                        label = { Text(LauncherText.get(R.string.quick_join_server_domain_ip_port), fontSize = 11.sp) },
                                         singleLine = true,
                                         modifier = Modifier.weight(1f)
                                     )
                                     OutlinedTextField(
                                         value = config.proxy,
                                         onValueChange = { onConfigChange(config.copy(proxy = it)) },
-                                        label = { Text("HTTP/SOCKS5 Proxy", fontSize = 11.sp) },
+                                        label = { Text(LauncherText.get(R.string.http_socks5_proxy), fontSize = 11.sp) },
                                         singleLine = true,
                                         modifier = Modifier.weight(1f)
                                     )
@@ -8311,17 +8334,17 @@ private fun CleanSettingsViewport(
                                     OutlinedButton(onClick = { HorizonNativeBridge.exportPerformanceReport(context, config.profile) }) {
                                         Icon(Icons.Default.Analytics, contentDescription = null, modifier = Modifier.size(15.dp))
                                         Spacer(Modifier.width(4.dp))
-                                        Text("Export Perf", fontSize = 11.sp)
+                                        Text(LauncherText.get(R.string.export_perf), fontSize = 11.sp)
                                     }
                                     OutlinedButton(onClick = { HorizonNativeBridge.openSystemFilesApp(context) }) {
                                         Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(15.dp))
                                         Spacer(Modifier.width(4.dp))
-                                        Text("Open Folder", fontSize = 11.sp)
+                                        Text(LauncherText.get(R.string.open_folder), fontSize = 11.sp)
                                     }
                                     OutlinedButton(onClick = onOpenLogs) {
                                         Icon(Icons.Default.Terminal, contentDescription = null, modifier = Modifier.size(15.dp))
                                         Spacer(Modifier.width(4.dp))
-                                        Text("System Log", fontSize = 11.sp)
+                                        Text(LauncherText.get(R.string.system_log), fontSize = 11.sp)
                                     }
                                 }
                             }
@@ -8372,25 +8395,25 @@ private fun ZalithRamAllocationCard(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "RAM Allocation (Minecraft 26.3 Engine)",
+                            text = LauncherText.get(R.string.ram_allocation_minecraft_26_3_engine),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         LavenderTagBadge(
-                            text = if (isUnlimited) "Unlimited (Default OS)" else "$sliderDisplayMb MB"
+                            text = if (isUnlimited) LauncherText.get(R.string.unlimited_default_os) else "$sliderDisplayMb MB"
                         )
                     }
                     Text(
-                        text = "RAM HP Terdeteksi: $totalRamMb MB (~${String.format(Locale.US, "%.1f", totalRamMb / 1024f)} GB) • Tersedia: $availRamMb MB",
+                        text = LauncherText.get(R.string.detected_device_ram_mb_gb_available_mb, totalRamMb, String.format(Locale.US, "%.1f", totalRamMb / 1024f), availRamMb),
                         fontSize = 11.sp,
                         color = SkyBlueAccent
                     )
                     Text(
                         text = if (isUnlimited) {
-                            "Mode Default Aktif: Bebas mengikuti batas maksimal OS Android secara dinamis (Direkomendasikan)"
+                            LauncherText.get(R.string.default_mode_active_freely_follows_the_android)
                         } else {
-                            "Batas alokasi memori manual untuk runtime Rust, WGPU & tekstur Minecraft: $sliderDisplayMb MB"
+                            LauncherText.get(R.string.manual_memory_allocation_limit_for_the_rust, sliderDisplayMb)
                         },
                         fontSize = 11.sp,
                         color = MutedSubtitleText
@@ -8423,7 +8446,7 @@ private fun ZalithRamAllocationCard(
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            text = "Bebas / Limit OS Android (Default)",
+                            text = LauncherText.get(R.string.unlimited_android_os_limit_default),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isUnlimited) SkyBlueDarkText else Color.White,
@@ -8457,7 +8480,7 @@ private fun ZalithRamAllocationCard(
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            text = if (!isUnlimited) "Manual: $sliderDisplayMb MB" else "Atur Manual (Slider)",
+                            text = if (!isUnlimited) LauncherText.get(R.string.manual_mb, sliderDisplayMb) else LauncherText.get(R.string.set_manually_slider),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (!isUnlimited) SkyBlueDarkText else Color.White,
@@ -8494,7 +8517,7 @@ private fun ZalithRamAllocationCard(
                     color = if (isUnlimited) SubRailCapsuleActive else SkyBlueAccent
                 ) {
                     Text(
-                        text = if (isUnlimited) "OS Limit" else "$sliderDisplayMb MB",
+                        text = if (isUnlimited) LauncherText.get(R.string.os_limit) else "$sliderDisplayMb MB",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = if (isUnlimited) SkyBlueAccent else SkyBlueDarkText,
@@ -8555,8 +8578,8 @@ private fun ZalithLaunchSidebar(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = if (activeAccount.slimSkinModel) "${activeAccount.accountType.badge} • Slim"
-                            else "${activeAccount.accountType.badge} • Wide",
+                            text = if (activeAccount.slimSkinModel) LauncherText.get(R.string.slim, activeAccount.accountType.badge)
+                            else LauncherText.get(R.string.wide, activeAccount.accountType.badge),
                             fontSize = 10.sp,
                             color = SkyBlueAccent,
                             maxLines = 1
@@ -8581,10 +8604,10 @@ private fun ZalithLaunchSidebar(
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Minecraft 26.3", fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = Color.White)
                             Text(
-                                text = if (installStatus.ready) "Ready"
-                                else if (installStatus.paused) "Paused (${installStatus.percent}%)"
+                                text = if (installStatus.ready) LauncherText.get(R.string.ready)
+                                else if (installStatus.paused) LauncherText.get(R.string.paused, installStatus.percent)
                                 else if (installStatus.running) "${installStatus.percent}% (${installStatus.speedText.ifBlank { "Downloading" }})"
-                                else "Needs Download",
+                                else LauncherText.get(R.string.needs_download),
                                 fontSize = 11.sp,
                                 color = if (installStatus.ready) Color(0xFF81C784)
                                 else if (installStatus.paused) Color(0xFFFFB74D)
@@ -8622,10 +8645,10 @@ private fun ZalithLaunchSidebar(
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            text = if (installStatus.paused) "PAUSED"
+                            text = if (installStatus.paused) LauncherText.get(R.string.paused_2)
                             else if (installStatus.running) "${installStatus.percent}%"
-                            else if (installStatus.ready) "PLAY"
-                            else "INSTALL",
+                            else if (installStatus.ready) LauncherText.get(R.string.play)
+                            else LauncherText.get(R.string.install_2),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 15.sp,
                             color = if (installStatus.running) SkyBlueAccent else SkyBlueDarkText

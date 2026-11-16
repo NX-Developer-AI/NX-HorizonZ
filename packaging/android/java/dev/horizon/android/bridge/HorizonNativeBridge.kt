@@ -1,5 +1,7 @@
 package dev.horizon.android.bridge
 
+import dev.horizon.android.R
+import dev.horizon.android.i18n.LauncherText
 import android.app.ActivityManager
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -606,7 +608,7 @@ object HorizonNativeBridge {
     fun copyToClipboard(context: Context, label: String, text: String) {
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         cm?.setPrimaryClip(ClipData.newPlainText(label, text))
-        Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, LauncherText.get(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
 
     @Volatile
@@ -976,7 +978,7 @@ object HorizonNativeBridge {
         val newFile = File(libraryDir, newFileName)
         if (newFile.absolutePath != oldFile.absolutePath) {
             if (newFile.exists()) {
-                Toast.makeText(context, "Nama skin '$newFileName' sudah dipakai.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, LauncherText.get(R.string.skin_name_is_already_in_use, newFileName), Toast.LENGTH_SHORT).show()
                 return null
             }
             if (!oldFile.renameTo(newFile)) return null
@@ -1012,7 +1014,7 @@ object HorizonNativeBridge {
         return try {
             val rawBmp = context.contentResolver.openInputStream(uri)?.use { input ->
                 BitmapFactory.decodeStream(input)
-            } ?: return SkinDetectionResult(false, null, account.slimSkinModel, "", "Gagal membaca gambar dari penyimpanan.")
+            } ?: return SkinDetectionResult(false, null, account.slimSkinModel, "", LauncherText.get(R.string.failed_to_read_the_image_from_storage))
 
             val w = rawBmp.width
             val h = rawBmp.height
@@ -1030,7 +1032,7 @@ object HorizonNativeBridge {
                 val scaled32 = Bitmap.createScaledBitmap(rawBmp, 64, 32, false)
                 finalBitmap = normalizeAndCleanSkin64x64(convertLegacy64x32To64x64(scaled32))
                 detectedSlim = detectSlimArmsFrom64x64(finalBitmap)
-                typeTag = "Legacy 64×32 → 64×64"
+                typeTag = LauncherText.get(R.string.legacy_64_32_64_64)
             } else if (w == h && w >= 64 && isLikelyUvSkin(rawBmp, isLegacy = false)) {
                 val scaled64 = if (w == 64 && h == 64) {
                     rawBmp.copy(Bitmap.Config.ARGB_8888, true)
@@ -1039,11 +1041,11 @@ object HorizonNativeBridge {
                 }
                 finalBitmap = normalizeAndCleanSkin64x64(scaled64)
                 detectedSlim = detectSlimArmsFrom64x64(finalBitmap)
-                typeTag = "Minecraft Skin (${w}×${h})"
+                typeTag = LauncherText.get(R.string.minecraft_skin, w, h)
             } else {
                 finalBitmap = convertRegularPhotoToMinecraftSkin64x64(rawBmp, account.slimSkinModel)
                 detectedSlim = account.slimSkinModel
-                typeTag = "Photo-to-Skin (${w}×${h})"
+                typeTag = LauncherText.get(R.string.photo_to_skin, w, h)
             }
 
             FileOutputStream(outFile).use { fos ->
@@ -1062,8 +1064,8 @@ object HorizonNativeBridge {
             val updatedLibrary = loadSavedSkinLibrary(context).filterNot { it.fileName == savedFileName } + newItem
             saveSkinLibraryMetadata(context, updatedLibrary)
 
-            val modelName = if (detectedSlim) "Slim (3px Alex)" else "Wide (4px Steve)"
-            val detailMsg = "Skin '$savedFileName' ($typeTag • $modelName) berhasil diimpor & disimpan ke Pilih Skin!"
+            val modelName = if (detectedSlim) LauncherText.get(R.string.slim_3px_alex) else LauncherText.get(R.string.wide_4px_steve)
+            val detailMsg = LauncherText.get(R.string.skin_imported_saved_to_the_skin_picker, savedFileName, typeTag, modelName)
 
             syncActiveSkinToGameEngine(context, outFile, detectedSlim, config.profile, config.enableSystemLog)
             SkinDetectionResult(
@@ -1076,7 +1078,7 @@ object HorizonNativeBridge {
             )
         } catch (e: Exception) {
             appendSystemLog("Skin detection error: ${e.message}", config.enableSystemLog, context)
-            SkinDetectionResult(false, null, account.slimSkinModel, "", "Error mendeteksi skin: ${e.message}")
+            SkinDetectionResult(false, null, account.slimSkinModel, "", LauncherText.get(R.string.skin_detection_error, e.message))
         }
     }
 
@@ -1591,7 +1593,7 @@ object HorizonNativeBridge {
                     aiAgentAutonomousActions = obj.optBoolean("aiAgentAutonomousActions", true),
                     aiAgentTaskPrompt = obj.optString(
                         "aiAgentTaskPrompt",
-                        "Bantu player di dalam game Minecraft 26.3, jawab chat/instruksi, dan jalankan aksi kontrol jika diminta."
+                        LauncherText.get(R.string.help_the_player_inside_minecraft_26_3)
                     )
                 )
             } catch (e: Exception) {
@@ -2349,7 +2351,7 @@ object HorizonNativeBridge {
             kpFile.writeText(obj.toString(2))
         }
         appendSystemLog("Reset on-screen touch keypad layout to defaults.", config.enableSystemLog, context)
-        Toast.makeText(context, "Touch keypad layout reset to default", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, LauncherText.get(R.string.touch_keypad_layout_reset_to_default), Toast.LENGTH_SHORT).show()
     }
 
     // ========================================================================
@@ -2695,7 +2697,7 @@ object HorizonNativeBridge {
 
     fun openSystemFilesApp(context: Context, subDocumentId: String = "root") {
         if ((subDocumentId == "root/saves" || subDocumentId.startsWith("root/saves/")) && isGameCurrentlyRunning(context)) {
-            Toast.makeText(context, "World folder access is blocked while Minecraft is running. Return to the launcher first.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, LauncherText.get(R.string.world_folder_access_is_blocked_while_minecraft), Toast.LENGTH_LONG).show()
             return
         }
         try {
@@ -2715,7 +2717,7 @@ object HorizonNativeBridge {
                 val fallback = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
                 context.startActivity(fallback)
             } catch (ex: Exception) {
-                Toast.makeText(context, "Files directory: ${context.filesDir.absolutePath}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, LauncherText.get(R.string.files_directory, context.filesDir.absolutePath), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -2741,9 +2743,9 @@ object HorizonNativeBridge {
         if (found != null) {
             val content = found.readText().takeLast(8000)
             copyToClipboard(context, "Horizon Performance Report", content)
-            Toast.makeText(context, "Exported ${found.name} to clipboard", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, LauncherText.get(R.string.exported_to_clipboard, found.name), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "No performance recording found yet — enable Perf Telemetry and play first.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, LauncherText.get(R.string.no_performance_recording_found_yet_enable_perf), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -2795,7 +2797,7 @@ object HorizonNativeBridge {
         Thread({
             val progressFile = File(home, "zalith-install-progress.json")
             val root26 = File(home, ".local/horizon-client/26.3").apply { mkdirs() }
-            appendInstallLogFile(home, "[Managed Downloader] Memulai sinkronisasi aset resmi Minecraft 26.3...")
+            appendInstallLogFile(home, LauncherText.get(R.string.managed_downloader_starting_official_minecraft_26_3))
 
             // Stage 1: Mojang Manifest & Engine bundle
             progressFile.writeText(
@@ -2808,7 +2810,7 @@ object HorizonNativeBridge {
                     put("total", 100)
                     put("speed", "1.2 MB/s")
                     put("currentUrl", "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json")
-                    put("detail", "Memeriksa manifest Mojang 26.3")
+                    put("detail", LauncherText.get(R.string.checking_the_mojang_26_3_manifest))
                     put("error", "")
                 }.toString()
             )
@@ -2828,7 +2830,7 @@ object HorizonNativeBridge {
                         put("total", 100)
                         put("speed", "Local")
                         put("currentUrl", "local://engine-data.zip")
-                        put("detail", "Mengekstrak kontrol sentuh & tabel worldgen")
+                        put("detail", LauncherText.get(R.string.extracting_touch_controls_worldgen_tables))
                         put("error", "")
                     }.toString()
                 )
@@ -2846,7 +2848,7 @@ object HorizonNativeBridge {
                         }
                     }
                 }
-                appendInstallLogFile(home, "[Extract] Kontrol sentuh & tabel worldgen berhasil dipasang.")
+                appendInstallLogFile(home, LauncherText.get(R.string.extract_touch_controls_worldgen_tables_installed_successfully))
             }
 
             // Stage 3: Write required markers & verify
@@ -2860,7 +2862,7 @@ object HorizonNativeBridge {
                     put("total", 100)
                     put("speed", "Verified")
                     put("currentUrl", "https://resources.download.minecraft.net/")
-                    put("detail", "Verifikasi indeks aset 26.3")
+                    put("detail", LauncherText.get(R.string.verifying_the_26_3_asset_index))
                     put("error", "")
                 }.toString()
             )
@@ -2880,11 +2882,11 @@ object HorizonNativeBridge {
                     put("total", 100)
                     put("speed", "Done")
                     put("currentUrl", "")
-                    put("detail", "100% Terverifikasi")
+                    put("detail", LauncherText.get(R.string.text_100_verified))
                     put("error", "")
                 }.toString()
             )
-            appendInstallLogFile(home, "[Selesai] 100% — Seluruh aset Minecraft 26.3, kontrol sentuh, dan tabel worldgen siap dimainkan!")
+            appendInstallLogFile(home, LauncherText.get(R.string.done_100_all_minecraft_26_3_assets))
             appendSystemLog("Minecraft 26.3 official asset download complete & verified.", logEnabled, context)
         }, "HorizonZ-ManagedDownloader").start()
         return true
@@ -2893,14 +2895,14 @@ object HorizonNativeBridge {
     fun pauseMinecraft26Download(context: Context, logEnabled: Boolean = true) {
         val home = ensureHomeDirectories(context)
         File(home, "zalith-install-paused.flag").writeText("1")
-        appendInstallLogFile(home, "[Paused] Asset download paused by user. Tap Resume to continue.")
+        appendInstallLogFile(home, LauncherText.get(R.string.paused_asset_download_paused_by_user_tap))
         appendSystemLog("Paused Minecraft 26.3 asset download.", logEnabled, context)
     }
 
     fun resumeMinecraft26Download(context: Context, logEnabled: Boolean = true) {
         val home = ensureHomeDirectories(context)
         File(home, "zalith-install-paused.flag").delete()
-        appendInstallLogFile(home, "[Resumed] Resuming Minecraft 26.3 asset download...")
+        appendInstallLogFile(home, LauncherText.get(R.string.resumed_resuming_minecraft_26_3_asset_download))
         appendSystemLog("Resumed Minecraft 26.3 asset download.", logEnabled, context)
     }
 
@@ -2921,9 +2923,9 @@ object HorizonNativeBridge {
             }
         }
 
-        appendInstallLogFile(home, "[Cancelled] Download cancelled by user. Partial staging files deleted.")
+        appendInstallLogFile(home, LauncherText.get(R.string.cancelled_download_cancelled_by_user_partial_staging))
         appendSystemLog("Cancelled asset download and deleted partial files.", logEnabled, context)
-        Toast.makeText(context, "Download dibatalkan & file sementara dihapus", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, LauncherText.get(R.string.download_cancelled_temporary_files_deleted), Toast.LENGTH_SHORT).show()
     }
 
     fun getInstalledAssetsDiskSizeFormatted(context: Context): String {
@@ -2970,7 +2972,7 @@ object HorizonNativeBridge {
             }
         }
         File(home, ".local/horizon-client/26.3").mkdirs()
-        appendInstallLogFile(home, "[Reset] Seluruh aset Minecraft 26.3 telah dihapus total oleh pengguna.")
+        appendInstallLogFile(home, LauncherText.get(R.string.reset_all_minecraft_26_3_assets_were))
         appendSystemLog("Deleted all Minecraft 26.3 assets and reset install state.", logEnabled, context)
         return deletedAny
     }
@@ -2982,7 +2984,7 @@ object HorizonNativeBridge {
     ) {
         val home = ensureHomeDirectories(context)
         Thread({
-            appendInstallLogFile(home, "[Smart Repair] Scanning installed Minecraft 26.3 files for corruption or missing items...")
+            appendInstallLogFile(home, LauncherText.get(R.string.smart_repair_scanning_installed_minecraft_26_3))
             appendSystemLog("Running Smart Incremental Asset Repair...", logEnabled, context)
 
             val root26 = File(home, ".local/horizon-client/26.3")
@@ -3020,9 +3022,9 @@ object HorizonNativeBridge {
                 }
             }
             if (repairedFromBundle > 0) {
-                appendInstallLogFile(home, "[Smart Repair] Restored $repairedFromBundle missing/corrupted files from engine-data.zip.")
+                appendInstallLogFile(home, LauncherText.get(R.string.smart_repair_restored_missing_corrupted_files_from, repairedFromBundle))
             } else {
-                appendInstallLogFile(home, "[Smart Repair] All engine-data.zip & touch control files verified intact.")
+                appendInstallLogFile(home, LauncherText.get(R.string.smart_repair_all_engine_data_zip_touch))
             }
 
             val hasAssetIndex = File(root26, "asset-index.json").isFile && File(root26, "asset-index.json").length() > 64L
@@ -3035,12 +3037,12 @@ object HorizonNativeBridge {
                 progFile.writeText(
                     "{\"ready\":true,\"running\":false,\"paused\":false,\"stage\":\"Ready\",\"done\":100,\"total\":100,\"speed\":\"Verified\",\"currentUrl\":\"\",\"detail\":\"Smart Repair Complete\",\"error\":\"\"}"
                 )
-                appendInstallLogFile(home, "[Smart Repair] Verification complete! 0 Mojang files needed re-downloading.")
+                appendInstallLogFile(home, LauncherText.get(R.string.smart_repair_verification_complete_0_mojang_files))
                 appendSystemLog("Smart Repair complete — all existing assets verified!", logEnabled, context)
                 val msg = if (repairedFromBundle > 0) {
-                    "Repair selesai! $repairedFromBundle file engine/kontrol berhasil dipulihkan dan seluruh aset Minecraft 26.3 terverifikasi lengkap."
+                    LauncherText.get(R.string.repair_complete_engine_control_files_were_restored, repairedFromBundle)
                 } else {
-                    " Verifikasi selesai! Seluruh file Minecraft 26.3, tabel worldgen, audio, dan 60 ikon kontrol sentuh dalam kondisi lengkap & utuh (0 file rusak)."
+                    LauncherText.get(R.string.verification_complete_all_minecraft_26_3_files)
                 }
                 if (onRepairFinished != null) {
                     android.os.Handler(android.os.Looper.getMainLooper()).post {
@@ -3050,11 +3052,11 @@ object HorizonNativeBridge {
             } else {
                 appendInstallLogFile(
                     home,
-                    "[Smart Repair] Missing core Mojang index/audio detected (index=$hasAssetIndex, res=$hasResources, audio=$hasAudio) — starting incremental download for missing files only..."
+                    LauncherText.get(R.string.smart_repair_missing_core_mojang_index_audio, hasAssetIndex, hasResources, hasAudio)
                 )
                 File(root26, "android-downloads-v2.json").delete()
                 startMinecraft26Download(context, logEnabled)
-                val msg = "Ditemukan file aset utama Mojang yang belum lengkap (Index: $hasAssetIndex, Resources: $hasResources, Audio: $hasAudio). Mengunduh file yang kurang secara otomatis..."
+                val msg = LauncherText.get(R.string.incomplete_core_mojang_asset_files_found_index, hasAssetIndex, hasResources, hasAudio)
                 if (onRepairFinished != null) {
                     android.os.Handler(android.os.Looper.getMainLooper()).post {
                         onRepairFinished(false, msg)
@@ -3097,7 +3099,7 @@ object HorizonNativeBridge {
                     ready = obj.optBoolean("ready", false),
                     running = running,
                     paused = paused && running,
-                    stage = if (paused && running) "Paused — ${formatStageLabel(rawStage)}" else formatStageLabel(rawStage),
+                    stage = if (paused && running) LauncherText.get(R.string.paused_3, formatStageLabel(rawStage)) else formatStageLabel(rawStage),
                     done = obj.optLong("done", 0L),
                     total = obj.optLong("total", 100L),
                     speedText = if (paused && running) "Paused" else obj.optString("speed", ""),
@@ -3115,7 +3117,7 @@ object HorizonNativeBridge {
             ready = ready,
             running = false,
             paused = false,
-            stage = if (ready) "Installed & Ready" else "Needs Download",
+            stage = if (ready) LauncherText.get(R.string.installed_ready) else LauncherText.get(R.string.needs_download),
             done = if (ready) 100L else 0L,
             total = 100L,
             logs = logLines
@@ -3124,14 +3126,14 @@ object HorizonNativeBridge {
 
     private fun formatStageLabel(stage: String): String {
         return when (stage) {
-            "Metadata" -> "1/6 Fetching Mojang 26.3 Manifest"
-            "Download" -> "2/6 Downloading Minecraft 26.3 Assets & JARs"
-            "Extract" -> "3/6 Extracting Client Textures & Engine Data"
-            "WorldData" -> "4/6 Building Worldgen & Biome Registries"
-            "Controls" -> "5/6 Preparing Touch Controls (60 Icons)"
-            "Finalize" -> "6/6 Finalizing Engine Resources"
-            "Ready" -> "Installed & Ready"
-            "Paused" -> "Download Paused"
+            "Metadata" -> LauncherText.get(R.string.text_1_6_fetching_mojang_26_3_manifest)
+            "Download" -> LauncherText.get(R.string.text_2_6_downloading_minecraft_26_3_assets)
+            "Extract" -> LauncherText.get(R.string.text_3_6_extracting_client_textures_engine_data)
+            "WorldData" -> LauncherText.get(R.string.text_4_6_building_worldgen_biome_registries)
+            "Controls" -> LauncherText.get(R.string.text_5_6_preparing_touch_controls_60_icons)
+            "Finalize" -> LauncherText.get(R.string.text_6_6_finalizing_engine_resources)
+            "Ready" -> LauncherText.get(R.string.installed_ready)
+            "Paused" -> LauncherText.get(R.string.download_paused)
             else -> stage
         }
     }
@@ -4281,7 +4283,7 @@ object HorizonNativeBridge {
         }
         invalidateContentCaches()
         appendSystemLog("Uninstalled '${item.title}' from active profile.", logEnabled, context)
-        Toast.makeText(context, "${item.title} dihapus dari perangkat.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, LauncherText.get(R.string.deleted_from_the_device, item.title), Toast.LENGTH_SHORT).show()
         return deletedAny
     }
 
@@ -4982,13 +4984,13 @@ object HorizonNativeBridge {
             listOf(
                 StoreVersionRelease(
                     id = "${item.id}-${item.version}",
-                    name = "[${item.versionBadge}] ${item.title} v${item.version} (Latest)",
+                    name = LauncherText.get(R.string.v_latest, item.versionBadge, item.title, item.version),
                     versionNumber = item.version,
                     mcVersions = item.supportedMcVersions.ifEmpty { listOf("26.3") },
                     kindLabel = item.kindBadge,
                     releaseType = "release",
                     downloadsCount = item.downloadsCount,
-                    datePublished = "Latest Release • playhorizon.dev",
+                    datePublished = LauncherText.get(R.string.latest_release_playhorizon_dev),
                     fileName = item.fileName,
                     downloadUrl = item.downloadUrl,
                     sizeBytes = item.sizeBytes,
@@ -5002,13 +5004,13 @@ object HorizonNativeBridge {
         if (prevVer == item.version) return baseList
         val prevRelease = StoreVersionRelease(
             id = "${item.id}-$prevVer",
-            name = "[${item.versionBadge}] ${item.title} v$prevVer (Previous)",
+            name = LauncherText.get(R.string.v_previous, item.versionBadge, item.title, prevVer),
             versionNumber = prevVer,
             mcVersions = item.supportedMcVersions.ifEmpty { listOf("26.3") },
             kindLabel = item.kindBadge,
             releaseType = "release",
             downloadsCount = (item.downloadsCount * 2L) / 3L,
-            datePublished = "Previous Release • playhorizon.dev",
+            datePublished = LauncherText.get(R.string.previous_release_playhorizon_dev),
             fileName = item.fileName,
             downloadUrl = item.downloadUrl,
             sizeBytes = item.sizeBytes,
@@ -5306,7 +5308,7 @@ object HorizonNativeBridge {
                         running = true,
                         paused = false,
                         percent = 4,
-                        speedText = "Connecting...",
+                        speedText = LauncherText.get(R.string.connecting),
                         statusText = "playhorizon.dev/mods/${item.id}"
                     ),
                     force = true
@@ -5335,8 +5337,8 @@ object HorizonNativeBridge {
                                 running = true,
                                 paused = false,
                                 percent = pct,
-                                speedText = "Local Bundle",
-                                statusText = "Verifying & packaging $canonicalFileName..."
+                                speedText = LauncherText.get(R.string.local_bundle),
+                                statusText = LauncherText.get(R.string.verifying_packaging, canonicalFileName)
                             ),
                             force = true
                         )
@@ -5372,8 +5374,8 @@ object HorizonNativeBridge {
                                                     running = true,
                                                     paused = true,
                                                     percent = ((downloaded * 100L) / totalBytes).toInt().coerceIn(0, 99),
-                                                    speedText = "Paused",
-                                                    statusText = "Paused (${downloaded / 1024} KB)"
+                                                    speedText = LauncherText.get(R.string.paused_4),
+                                                    statusText = LauncherText.get(R.string.paused_kb, downloaded / 1024)
                                                 ),
                                                 force = true
                                             )
@@ -5420,7 +5422,7 @@ object HorizonNativeBridge {
                 if (storeDownloadCancelled.get()) {
                     partFile.delete()
                     postProgress(StoreDownloadProgress(), force = true)
-                    onComplete(false, "Download '${item.title}' dibatalkan & file sementara dihapus.")
+                    onComplete(false, LauncherText.get(R.string.download_of_cancelled_temporary_file_deleted, item.title))
                     return@Thread
                 }
 
@@ -5547,12 +5549,12 @@ object HorizonNativeBridge {
                 invalidateContentCaches()
                 postProgress(StoreDownloadProgress(), force = true)
                 appendSystemLog("Installed '${item.title}' v${item.version} ($canonicalFileName).", logEnabled, context)
-                onComplete(true, "Berhasil memasang ${item.title} (v${item.version})!")
+                onComplete(true, LauncherText.get(R.string.installed_v_successfully, item.title, item.version))
             } catch (e: Exception) {
                 partFile?.delete()
                 postProgress(StoreDownloadProgress(), force = true)
                 appendSystemLog("Store download error for ${item.title}: ${e.message}", logEnabled, context)
-                onComplete(false, "Gagal mengunduh ${item.title}: ${e.message}")
+                onComplete(false, LauncherText.get(R.string.failed_to_download, item.title, e.message))
             }
         }, "HorizonZ-StoreDownloader").start()
     }
@@ -5568,7 +5570,7 @@ object HorizonNativeBridge {
         val hash = kotlin.math.abs(saveFile.name.hashCode().toLong())
         val deterministicSeed = (3518443851819293050L xor (hash * 6364136223846793005L)).toString()
 
-        var mode = "Survival Mode"
+        var mode = LauncherText.get(R.string.survival_mode)
         val difficulty = "Normal"
         val topSize = if (saveFile.isDirectory) {
             saveFile.listFiles()?.sumOf { it.length() } ?: 49152L
@@ -5577,7 +5579,7 @@ object HorizonNativeBridge {
         }
         val playMinutes = ((topSize / 8192L).coerceIn(5L, 720L)).toInt()
         if (saveFile.name.contains("creative", ignoreCase = true)) {
-            mode = "Creative Mode"
+            mode = LauncherText.get(R.string.creative_mode)
         }
         val days = playMinutes / (24 * 60)
         val hours = (playMinutes % (24 * 60)) / 60
@@ -5598,7 +5600,7 @@ object HorizonNativeBridge {
         val cacheKey = "${packFile.absolutePath}:${packFile.lastModified()}:${packFile.length()}"
         packDetailCache[cacheKey]?.let { return it }
         val sizeKb = String.format(Locale.US, "%.2f KB", packFile.length() / 1024.0)
-        val packType = if (packFile.isDirectory) "Folder" else "ZIP Archive"
+        val packType = if (packFile.isDirectory) LauncherText.get(R.string.folder) else LauncherText.get(R.string.zip_archive)
         var desc = packFile.nameWithoutExtension.replace("-", " ").replace("_", " ")
         var formatVer = 75
 
@@ -5715,10 +5717,10 @@ object HorizonNativeBridge {
                 }
             }
             appendSystemLog("Backed up world save '${saveFile.name}' to backups/${outZip.name}", logEnabled, context)
-            Toast.makeText(context, "Backup berhasil disimpan: backups/${outZip.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, LauncherText.get(R.string.backup_saved_successfully_backups, outZip.name), Toast.LENGTH_SHORT).show()
             outZip
         } catch (e: Exception) {
-            Toast.makeText(context, "Gagal backup save: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, LauncherText.get(R.string.failed_to_back_up_save, e.message), Toast.LENGTH_SHORT).show()
             null
         }
     }
@@ -5734,13 +5736,13 @@ object HorizonNativeBridge {
         }
         val dest = File(parent, finalName)
         if (dest.exists()) {
-            Toast.makeText(context, "Nama '$finalName' sudah digunakan.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, LauncherText.get(R.string.the_name_is_already_in_use, finalName), Toast.LENGTH_SHORT).show()
             return false
         }
         val ok = targetFile.renameTo(dest)
         if (ok) {
             appendSystemLog("Renamed '${targetFile.name}' -> '${dest.name}'", logEnabled, context)
-            Toast.makeText(context, "Berhasil diubah menjadi ${dest.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, LauncherText.get(R.string.renamed_to_successfully, dest.name), Toast.LENGTH_SHORT).show()
         }
         return ok
     }
@@ -6027,7 +6029,7 @@ object HorizonNativeBridge {
                     timestamp = "--:--:--",
                     severity = LogSeverityFilter.WARN,
                     sourceTag = "Settings",
-                    message = "System & Game Logging is currently disabled. Enable 'System & Game Runtime Logs' in Settings -> Launcher to record events."
+                    message = LauncherText.get(R.string.system_game_logging_is_currently_disabled_enable)
                 )
             )
         }
@@ -6134,7 +6136,7 @@ object HorizonNativeBridge {
         releaseMemoryForGameLaunch(context)
         File(home, "zalith-game-boot.txt").writeText("32|Starting HorizonZ Native Engine...")
         File(home, "zalith-launch-token.txt").writeText(System.currentTimeMillis().toString())
-        val ramLabel = if (config.ramAllocationMb <= 0) "Unlimited (OS Limit)" else "${config.ramAllocationMb} MB"
+        val ramLabel = if (config.ramAllocationMb <= 0) LauncherText.get(R.string.unlimited_os_limit) else "${config.ramAllocationMb} MB"
         appendSystemLog(
             "Launching Minecraft 26.3 (Player=${activeAccount.username}, Skin=${activeAccount.skinSourceLabel}, Renderer=${config.renderer.serdeKey}, Scale=${config.renderScalePercent}%, RAM=$ramLabel)",
             config.enableSystemLog,
@@ -6317,15 +6319,15 @@ object HorizonNativeBridge {
         context: Context,
         apiKeyOverride: String = "",
         modelId: String = "gemini-4-argon",
-        prompt: String = "Kamu adalah AI Agent di dalam Minecraft 26.3 (HorizonZ Launcher). Balas singkat 1 kalimat bahasa Indonesia bahwa koneksi Gemini AI Studio siap membantu player!"
+        prompt: String = LauncherText.get(R.string.you_are_the_ai_agent_inside_minecraft)
     ): Pair<Boolean, String> {
         val key = apiKeyOverride.trim().ifBlank { loadGeminiApiKeyLocal(context) }
         if (key.isBlank()) {
-            return false to "API Key Google AI Studio masih kosong. Silakan tempel API Key terlebih dahulu."
+            return false to LauncherText.get(R.string.the_google_ai_studio_api_key_is)
         }
         val requestedModel = modelId.removePrefix("models/").trim().ifBlank { "gemini-4-argon" }
         val candidates = resolveGeminiCandidateEndpoints(requestedModel)
-        var lastErrMsg = "Tidak dapat menghubungi endpoint Google AI Studio"
+        var lastErrMsg = LauncherText.get(R.string.unable_to_reach_the_google_ai_studio)
 
         for (candidateModel in candidates) {
             try {
@@ -6363,7 +6365,7 @@ object HorizonNativeBridge {
                         ?.trim()
                         .orEmpty()
                     val routeLabel = if (candidateModel == requestedModel) requestedModel else "$requestedModel (via $candidateModel)"
-                    return true to "Terhubung ke Google AI Studio [$routeLabel]:\n\"${reply.ifBlank { "OK (200)" }}\""
+                    return true to LauncherText.get(R.string.connected_to_google_ai_studio, routeLabel, reply.ifBlank { "OK (200)" })
                 } else {
                     val errTxt = runCatching { conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty() }.getOrDefault("")
                     lastErrMsg = runCatching {
@@ -6375,10 +6377,10 @@ object HorizonNativeBridge {
                     }
                 }
             } catch (e: Exception) {
-                lastErrMsg = e.message ?: "Network error"
+                lastErrMsg = e.message ?: LauncherText.get(R.string.network_error)
             }
         }
-        return false to "Gagal menghubungi Gemini API ($requestedModel): $lastErrMsg"
+        return false to LauncherText.get(R.string.failed_to_reach_the_gemini_api, requestedModel, lastErrMsg)
     }
 
     fun startHorizonGameActivity(

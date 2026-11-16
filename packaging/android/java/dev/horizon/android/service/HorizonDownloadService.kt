@@ -1,5 +1,7 @@
 package dev.horizon.android.service
 
+import dev.horizon.android.R
+import dev.horizon.android.i18n.LauncherText
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -61,8 +63,8 @@ class HorizonDownloadService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createChannelIfNeeded()
         val initialNotification = buildProgressNotification(
-            title = "Downloading Minecraft 26.3 (0%)",
-            subtitle = "Initializing Mojang asset downloader...",
+            title = LauncherText.get(R.string.downloading_minecraft_26_3_0),
+            subtitle = LauncherText.get(R.string.initializing_mojang_asset_downloader),
             percent = 0,
             indeterminate = true,
             ongoing = true
@@ -91,7 +93,7 @@ class HorizonDownloadService : Service() {
                         val status = HorizonNativeBridge.pollInstallProgress(applicationContext, true)
                         if (status.running) {
                             val speedPart = if (status.speedText.isNotBlank()) " • ${status.speedText}" else ""
-                            val title = "Minecraft 26.3 Download — ${status.percent}%$speedPart"
+                            val title = LauncherText.get(R.string.minecraft_26_3_download, status.percent, speedPart)
                             val detailLine = if (status.currentUrl.isNotBlank()) {
                                 "${status.stage}\n${status.currentUrl}"
                             } else {
@@ -107,8 +109,8 @@ class HorizonDownloadService : Service() {
                             nm?.notify(NOTIFICATION_ID, notif)
                         } else if (status.ready) {
                             val doneNotif = buildProgressNotification(
-                                title = "Minecraft 26.3 Ready to Play! (100%)",
-                                subtitle = "All official game assets, worldgen tables, and touch controls installed.",
+                                title = LauncherText.get(R.string.minecraft_26_3_ready_to_play_100),
+                                subtitle = LauncherText.get(R.string.all_official_game_assets_worldgen_tables_and),
                                 percent = 100,
                                 indeterminate = false,
                                 ongoing = false
@@ -117,7 +119,7 @@ class HorizonDownloadService : Service() {
                             break
                         } else if (status.error.isNotBlank()) {
                             val errNotif = buildProgressNotification(
-                                title = "Download Paused / Error",
+                                title = LauncherText.get(R.string.download_paused_error),
                                 subtitle = status.error,
                                 percent = status.percent,
                                 indeterminate = false,
@@ -184,10 +186,10 @@ class HorizonDownloadService : Service() {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Minecraft Asset Downloads",
+                LauncherText.get(R.string.minecraft_asset_downloads),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Shows live Minecraft 26.3 background download progress and speed"
+                description = LauncherText.get(R.string.shows_live_minecraft_26_3_background_download)
                 setShowBadge(false)
             }
             nm.createNotificationChannel(channel)

@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import dev.horizon.android.i18n.LauncherText;
 import java.util.Set;
 
 /**
@@ -138,10 +139,10 @@ public final class HorizonDocumentsProvider extends DocumentsProvider {
 
     private void enforceAccessGuards(String docId) throws FileNotFoundException {
         if (isSensitiveOrBlockedPath(docId)) {
-            throw new FileNotFoundException("Access to account or credential files is not permitted.");
+            throw new FileNotFoundException(LauncherText.get(R.string.documents_access_credentials_denied));
         }
         if (isWorldDocumentId(docId) && isGameActivelyRunning()) {
-            throw new FileNotFoundException("World access is blocked while playing. Return to the launcher before viewing or transferring worlds.");
+            throw new FileNotFoundException(LauncherText.get(R.string.documents_world_access_blocked));
         }
     }
 
@@ -155,8 +156,8 @@ public final class HorizonDocumentsProvider extends DocumentsProvider {
         row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
         row.add(Root.COLUMN_TITLE, "HorizonZ Launcher (26.3)");
         row.add(Root.COLUMN_SUMMARY, isGameActivelyRunning()
-            ? "Configuration, Mods & Packs (Worlds locked while playing)"
-            : "Worlds, Configuration, Resource Packs, Mods & Logs");
+            ? LauncherText.get(R.string.documents_summary_locked)
+            : LauncherText.get(R.string.documents_summary_full));
         row.add(Root.COLUMN_DOCUMENT_ID, ROOT_DOC_ID);
         return result;
     }
