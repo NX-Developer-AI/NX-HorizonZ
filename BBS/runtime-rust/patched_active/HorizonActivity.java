@@ -584,6 +584,7 @@ public final class HorizonActivity extends NativeActivity {
             if (homeDir != null) {
                 Os.setenv("HORIZON_HOME", homeDir.getAbsolutePath(), true);
                 Os.setenv("HORIZON_DIRECT_GAME", "1", true);
+                Os.setenv("HORIZON_OLDER_SERVERS", "1", true);
             }
             if (intent != null) {
                 boolean publicMode = intent.getBooleanExtra("HORIZON_ANDROID_PUBLIC", true);

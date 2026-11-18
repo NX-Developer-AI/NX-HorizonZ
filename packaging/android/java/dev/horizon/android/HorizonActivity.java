@@ -1441,6 +1441,7 @@ public final class HorizonActivity extends NativeActivity {
             if (homeDir != null) {
                 Os.setenv("HORIZON_HOME", homeDir.getAbsolutePath(), true);
                 Os.setenv("HORIZON_DIRECT_GAME", "1", true);
+                Os.setenv("HORIZON_OLDER_SERVERS", "1", true);
                 File appearanceFile = new File(homeDir, "horizon-appearance.json");
                 if (appearanceFile.exists()) {
                     Os.setenv("HORIZON_APPEARANCE_CONFIG", appearanceFile.getAbsolutePath(), true);

@@ -136,6 +136,7 @@ jobs:
             git clone --branch android https://github.com/Vasysik/horizon-android.git /tmp/horizon-upstream
             git -C /tmp/horizon-upstream checkout "$UPSTREAM_TARGET_COMMIT"
           fi
+          git -C /tmp/horizon-upstream apply --whitespace=nowarn "$GITHUB_WORKSPACE/scripts/patches/horizon-protocol-adapter.patch"
           rsync -a --delete --exclude='packaging/android' --exclude='scripts' --exclude='Update' --exclude='BBS' --exclude='docs/screenshots' --exclude='README.md' --exclude='.local' --exclude='.git' --exclude='.github' /tmp/horizon-upstream/ ./
           if [ -d "/tmp/horizon-upstream/docs" ]; then
             mkdir -p docs
@@ -161,7 +162,7 @@ jobs:
       - name: Cache Rust Engine Build
         uses: Swatinem/rust-cache@v2
         with:
-          key: horizon-real-engine-v33-150a414-${{ matrix.rust_target }}
+          key: horizon-real-engine-v33-150a414-adapter-1201-${{ matrix.rust_target }}
 
       - name: Compile Real Horizon Rust Engine (libhorizon_android.so) & Prestage Controls (${{ matrix.abi }})
         run: |
